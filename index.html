@@ -477,8 +477,8 @@
     body { background: white; }
     .header, .steps-bar, .rodape-acoes, .btn-exportar, .btn-perigo, .busca-wrap { display: none !important; }
     .tela { display: block !important; padding: 0; }
-    .tela:not(#tela-revisao) { display: none !important; }
-    #tela-revisao { display: block !important; }
+    .tela:not(#tela-4) { display: none !important; }
+    #tela-4 { display: block !important; }
     .secao, .item-card, .rev-produto { break-inside: avoid; }
   }
 </style>
@@ -1408,11 +1408,11 @@ function renderizarRevisao() {
 // EXPORTAR PDF
 // ============================================================
 function exportarOrcamento() {
-  // Vai para tela de revisão antes de imprimir
-  if (telaAtual !== 3) {
-    renderizarRevisao();
-  }
-  setTimeout(() => window.print(), 100);
+  // Sempre renderiza a revisão antes de imprimir
+  renderizarRevisao();
+  // Força tela-4 visível para o print
+  document.getElementById('tela-4').classList.add('ativa');
+  setTimeout(() => window.print(), 200);
 }
 
 // ============================================================
