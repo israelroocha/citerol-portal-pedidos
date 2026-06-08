@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedido de Uniformes | Corporativo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --vermelho: #9E0B0F;
+    --vermelho-claro: #FDF2F2;
+    --vermelho-borda: #E8A0A0;
+    --vermelho-bg: #FDF2F2;
+    --cinza-bg: #F5F4F0;
+    --cinza-borda: #E2E0D8;
+    --cinza-texto: #6B6860;
+    --texto: #1A1916;
+    --branco: #FFFFFF;
+    --verde: #1D9E75;
+    --verde-bg: #E1F5EE;
+    --azul: #185FA5;
+    --azul-bg: #E6F1FB;
+    --radius: 10px;
+    --sombra: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--cinza-bg);
+    color: var(--texto);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: var(--branco);
+    border-bottom: 1px solid var(--cinza-borda);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-logo {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--vermelho);
+    letter-spacing: -0.3px;
+  }
+  .header-logo span { color: var(--texto); font-weight: 400; font-size: 13px; margin-left: 8px; }
+  .header-info { display: flex; align-items: center; gap: 12px; }
+  .badge-loja {
+    background: var(--vermelho-claro);
+    color: var(--vermelho);
+    border: 1px solid var(--vermelho-borda);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .btn-sair {
+    background: none;
+    border: 1px solid var(--cinza-borda);
+    border-radius: 6px;
+    padding: 4px 12px;
+    color: var(--cinza-texto);
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .btn-sair:hover { background: var(--cinza-bg); }
+
+  /* ===== STEPS ===== */
+  .steps-bar {
+    background: var(--branco);
+    border-bottom: 1px solid var(--cinza-borda);
+    padding: 12px 24px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--cinza-texto);
+  }
+  .step-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--cinza-bg);
+    border: 1.5px solid var(--cinza-borda);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: var(--cinza-texto);
+    flex-shrink: 0;
+  }
+  .step.ativo .step-num { background: var(--vermelho); border-color: var(--vermelho); color: #fff; }
+  .step.ativo { color: var(--texto); font-weight: 600; }
+  .step.concluido .step-num { background: var(--verde); border-color: var(--verde); color: #fff; }
+  .step.concluido { color: var(--cinza-texto); }
+  .step-sep { width: 24px; height: 1.5px; background: var(--cinza-borda); }
+  .step-sep.ativo { background: var(--verde); }
+
+  /* ===== TELAS ===== */
+  .tela { display: none; max-width: 860px; margin: 0 auto; padding: 24px 24px 80px; }
+  .tela.ativa { display: block; }
+
+  /* ===== LOGIN ===== */
+  #tela-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  .login-card {
+    background: var(--branco);
+    border: 1px solid var(--cinza-borda);
+    border-radius: var(--radius);
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: var(--sombra);
+  }
+  .login-logo { font-size: 26px; font-weight: 800; color: var(--vermelho); margin-bottom: 4px; }
+  .login-sub { color: var(--cinza-texto); font-size: 13px; margin-bottom: 32px; }
+  .login-erro {
+    background: var(--vermelho-bg);
+    color: var(--vermelho);
+    border: 1px solid #F0997B;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  /* ===== CAMPOS ===== */
+  .campo { margin-bottom: 14px; }
+  .campo label { display: block; font-size: 12px; font-weight: 600; color: var(--cinza-texto); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .campo label .obrig { color: var(--vermelho); }
+  .campo input, .campo select, .campo textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--cinza-borda);
+    border-radius: 7px;
+    font-size: 14px;
+    color: var(--texto);
+    background: var(--branco);
+    transition: border-color 0.15s;
+    font-family: inherit;
+  }
+  .campo input:focus, .campo select:focus, .campo textarea:focus {
+    outline: none;
+    border-color: var(--vermelho);
+    box-shadow: 0 0 0 3px rgba(232,82,10,0.1);
+  }
+  .campo textarea { resize: vertical; min-height: 72px; }
+  .campo .hint { font-size: 11px; color: var(--cinza-texto); margin-top: 4px; }
+  .campo.erro input, .campo.erro select { border-color: var(--vermelho); }
+  .campo .msg-erro { font-size: 11px; color: var(--vermelho); margin-top: 4px; display: none; }
+  .campo.erro .msg-erro { display: block; }
+
+  /* ===== GRID DE CAMPOS ===== */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 14px; }
+  .col-span-2 { grid-column: span 2; }
+
+  /* ===== SEÇÕES ===== */
+  .secao {
+    background: var(--branco);
+    border: 1px solid var(--cinza-borda);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .secao-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--cinza-borda);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .secao-titulo { font-size: 13px; font-weight: 700; color: var(--texto); }
+  .secao-icone {
+    width: 28px; height: 28px;
+    background: var(--vermelho-claro);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .secao-corpo { padding: 16px 18px; }
+
+  /* ===== BOTÕES ===== */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none;
+    transition: all 0.15s;
+    font-family: inherit;
+    text-decoration: none;
+  }
+  .btn-primario { background: var(--vermelho); color: #fff; }
+  .btn-primario:hover { background: #7D090C; }
+  .btn-primario:disabled { background: var(--cinza-borda); color: var(--cinza-texto); cursor: not-allowed; }
+  .btn-secundario { background: var(--branco); color: var(--texto); border: 1.5px solid var(--cinza-borda); }
+  .btn-secundario:hover { background: var(--cinza-bg); }
+  .btn-perigo { background: var(--vermelho-bg); color: var(--vermelho); border: 1px solid #F0997B; }
+  .btn-perigo:hover { background: #F5C4B3; }
+  .btn-verde { background: var(--verde); color: #fff; }
+  .btn-verde:hover { background: #0F6E56; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+  .btn-lg { padding: 13px 28px; font-size: 15px; }
+
+  .rodape-acoes {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--branco);
+    border-top: 1px solid var(--cinza-borda);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 50;
+  }
+  .rodape-acoes.oculto { display: none; }
+
+  /* ===== BUSCA DE PRODUTOS ===== */
+  .busca-wrap { position: relative; margin-bottom: 16px; }
+  .busca-wrap input { padding-left: 36px; }
+  .busca-icone {
+    position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+    font-size: 16px; color: var(--cinza-texto); pointer-events: none;
+  }
+  .busca-resultados {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: var(--branco);
+    border: 1px solid var(--cinza-borda);
+    border-radius: 8px;
+    box-shadow: var(--sombra);
+    z-index: 200;
+    max-height: 320px;
+    overflow-y: auto;
+    display: none;
+  }
+  .busca-resultados.visivel { display: block; }
+  .resultado-item {
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--cinza-bg);
+    transition: background 0.1s;
+  }
+  .resultado-item:hover { background: var(--vermelho-claro); }
+  .resultado-item:last-child { border-bottom: none; }
+  .resultado-foto {
+    width: 40px; height: 40px;
+    border-radius: 6px;
+    background: var(--cinza-bg);
+    object-fit: cover;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: var(--cinza-texto);
+    border: 1px solid var(--cinza-borda);
+    overflow: hidden;
+  }
+  .resultado-foto img { width: 100%; height: 100%; object-fit: cover; }
+  .resultado-info { flex: 1; min-width: 0; }
+  .resultado-nome { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .resultado-sku { font-size: 11px; color: var(--cinza-texto); }
+  .resultado-preco { font-size: 13px; font-weight: 700; color: var(--vermelho); white-space: nowrap; }
+  .busca-vazio { padding: 20px; text-align: center; color: var(--cinza-texto); font-size: 13px; }
+
+  /* ===== ITENS ADICIONADOS ===== */
+  #lista-itens { margin-top: 8px; }
+  .item-card {
+    background: var(--branco);
+    border: 1px solid var(--cinza-borda);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .item-card-header {
+    padding: 12px 14px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--cinza-bg);
+  }
+  .item-foto {
+    width: 44px; height: 44px;
+    border-radius: 6px;
+    background: var(--cinza-bg);
+    border: 1px solid var(--cinza-borda);
+    object-fit: cover;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--cinza-texto);
+  }
+  .item-foto img { width: 100%; height: 100%; object-fit: cover; }
+  .item-info { flex: 1; min-width: 0; }
+  .item-nome { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-sku { font-size: 11px; color: var(--cinza-texto); }
+  .item-preco-unit { font-size: 13px; color: var(--cinza-texto); white-space: nowrap; }
+  .item-card-corpo { padding: 12px 14px; }
+
+  /* ===== GRADE ===== */
+  .grade-titulo { font-size: 11px; font-weight: 700; color: var(--cinza-texto); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .grade-celulas { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+  .grade-cel {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 3px;
+  }
+  .grade-cel label { font-size: 10px; font-weight: 700; color: var(--cinza-texto); text-transform: uppercase; letter-spacing: 0.3px; }
+  .grade-cel input {
+    width: 52px; height: 38px;
+    text-align: center;
+    border: 1px solid var(--cinza-borda);
+    border-radius: 6px;
+    font-size: 15px; font-weight: 600;
+    color: var(--texto);
+    background: var(--branco);
+    padding: 0;
+  }
+  .grade-cel input:focus {
+    outline: none;
+    border-color: var(--vermelho);
+    box-shadow: 0 0 0 3px rgba(232,82,10,0.12);
+  }
+  .grade-cel input::-webkit-inner-spin-button,
+  .grade-cel input::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .grade-cel input[type=number] { -moz-appearance: textfield; }
+  .grade-total-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    border-left: 1px solid var(--cinza-borda);
+    padding-left: 10px;
+    margin-left: 4px;
+  }
+  .grade-total-label { font-size: 10px; font-weight: 700; color: var(--verde); text-transform: uppercase; }
+  .grade-total-val { font-size: 15px; font-weight: 700; color: var(--verde); }
+
+  .item-rodape {
+    display: flex; align-items: center; gap: 14px;
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid var(--cinza-bg);
+    flex-wrap: wrap;
+  }
+  .desconto-wrap { display: flex; align-items: center; gap: 6px; }
+  .desconto-wrap label { font-size: 12px; color: var(--cinza-texto); font-weight: 600; white-space: nowrap; }
+  .desconto-wrap input { width: 68px; }
+  .item-valor-liq { margin-left: auto; text-align: right; }
+  .item-valor-liq .liq-label { font-size: 11px; color: var(--cinza-texto); }
+  .item-valor-liq .liq-val { font-size: 16px; font-weight: 700; color: var(--texto); }
+
+  /* ===== TOTAIS ===== */
+  .totais-bar {
+    background: var(--vermelho-claro);
+    border: 1px solid var(--vermelho-borda);
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex; gap: 32px; flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .total-item { }
+  .total-label { font-size: 11px; color: var(--vermelho); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+  .total-val { font-size: 22px; font-weight: 800; color: var(--vermelho); }
+  .total-sub { font-size: 11px; color: var(--cinza-texto); }
+
+  /* ===== REVISÃO ===== */
+  .rev-secao { margin-bottom: 20px; }
+  .rev-titulo { font-size: 12px; font-weight: 700; color: var(--cinza-texto); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--cinza-borda); }
+  .rev-linha { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; border-bottom: 1px solid var(--cinza-bg); }
+  .rev-linha:last-child { border-bottom: none; }
+  .rev-chave { color: var(--cinza-texto); }
+  .rev-val { font-weight: 600; text-align: right; }
+
+  .rev-produto {
+    background: var(--cinza-bg);
+    border-radius: 7px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .rev-prod-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .rev-prod-nome { font-weight: 700; font-size: 13px; }
+  .rev-prod-total { font-weight: 700; font-size: 14px; color: var(--vermelho); }
+  .rev-grade { display: flex; flex-wrap: wrap; gap: 6px; }
+  .rev-grade-cel {
+    background: var(--branco);
+    border: 1px solid var(--cinza-borda);
+    border-radius: 5px;
+    padding: 3px 8px;
+    font-size: 11px;
+    display: flex; gap: 4px; align-items: center;
+  }
+  .rev-grade-cel .sz { font-weight: 700; color: var(--cinza-texto); }
+  .rev-grade-cel .qty { font-weight: 700; color: var(--texto); }
+  .rev-desc { font-size: 11px; color: var(--cinza-texto); margin-top: 6px; }
+
+  /* ===== CONFIRMAÇÃO ===== */
+  .confirmacao-wrap { text-align: center; padding: 48px 24px; }
+  .confirmacao-icone { font-size: 64px; margin-bottom: 20px; }
+  .confirmacao-titulo { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+  .confirmacao-sub { color: var(--cinza-texto); margin-bottom: 32px; font-size: 15px; }
+  .confirmacao-deal {
+    background: var(--verde-bg);
+    border: 1px solid #5DCAA5;
+    border-radius: 8px;
+    padding: 14px 20px;
+    display: inline-block;
+    margin-bottom: 32px;
+    font-size: 14px;
+  }
+  .confirmacao-deal strong { color: var(--verde); }
+
+  /* ===== EXPORTAR ===== */
+  .btn-exportar {
+    background: var(--azul-bg);
+    color: var(--azul);
+    border: 1px solid #85B7EB;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .btn-exportar:hover { background: #B5D4F4; }
+
+  /* ===== LOADING ===== */
+  .loading-overlay {
+    position: fixed; inset: 0;
+    background: rgba(255,255,255,0.85);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 9999;
+    display: none;
+  }
+  .loading-overlay.visivel { display: flex; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--cinza-borda);
+    border-top-color: var(--vermelho);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-bottom: 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-txt { color: var(--cinza-texto); font-size: 14px; }
+
+  /* ===== VAZIO ===== */
+  .itens-vazio {
+    text-align: center;
+    padding: 32px;
+    color: var(--cinza-texto);
+    font-size: 14px;
+  }
+  .itens-vazio span { font-size: 36px; display: block; margin-bottom: 8px; }
+
+  @media (max-width: 600px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .col-span-2 { grid-column: span 1; }
+    .steps-bar { overflow-x: auto; }
+  }
+
+  /* ===== PRINT / PDF ===== */
+  @media print {
+    body { background: white; }
+    .header, .steps-bar, .rodape-acoes, .btn-exportar, .btn-perigo, .busca-wrap { display: none !important; }
+    .tela { display: block !important; padding: 0; }
+    .tela:not(#tela-revisao) { display: none !important; }
+    #tela-revisao { display: block !important; }
+    .secao, .item-card, .rev-produto { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-txt" id="loading-txt">Processando...</div>
+</div>
+
+<!-- ===== LOGIN ===== -->
+<div id="tela-login">
+  <div class="login-card">
+    <div class="login-logo">Pedido de Uniformes</div>
+    <div class="login-sub">Corporativo — Citerol</div>
+
+    <div class="login-erro" id="login-erro">Usuário ou senha incorretos.</div>
+
+    <div class="campo">
+      <label>Usuário da loja</label>
+      <input type="text" id="login-usuario" placeholder="Ex: loja-centro" autocomplete="username">
+    </div>
+    <div class="campo">
+      <label>Senha</label>
+      <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primario" style="width:100%; margin-top:8px;" onclick="fazerLogin()">Entrar</button>
+  </div>
+</div>
+
+<!-- ===== APP (após login) ===== -->
+<div id="app" style="display:none;">
+
+  <!-- Banner modo demo -->
+  <div id="banner-demo" style="background:#FDF2F2; border-bottom:1px solid #E8A0A0; padding:8px 24px; font-size:12px; color:#7D090C; text-align:center; display:none;">
+    ⚠️ <strong>Modo demonstração ativo</strong> — login e produtos são simulados, o pedido <strong>não será enviado</strong> ao HubSpot. Para ativar de verdade, configure o Worker e mude <code>MODO_DEMO = false</code>.
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-logo">Pedido de Uniformes <span>Corporativo</span></div>
+    <div class="header-info">
+      <div class="badge-loja" id="badge-loja-header"></div>
+      <button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div class="steps-bar" id="steps-bar">
+    <div class="step ativo" id="step-1">
+      <div class="step-num">1</div>
+      <span>Cliente</span>
+    </div>
+    <div class="step-sep" id="sep-1"></div>
+    <div class="step" id="step-2">
+      <div class="step-num">2</div>
+      <span>Produtos</span>
+    </div>
+    <div class="step-sep" id="sep-2"></div>
+    <div class="step" id="step-3">
+      <div class="step-num">3</div>
+      <span>Pagamento</span>
+    </div>
+    <div class="step-sep" id="sep-3"></div>
+    <div class="step" id="step-4">
+      <div class="step-num">4</div>
+      <span>Revisão</span>
+    </div>
+  </div>
+
+  <!-- ===== TELA 1: CLIENTE ===== -->
+  <div class="tela ativa" id="tela-1">
+
+    <div class="secao">
+      <div class="secao-header">
+        <div class="secao-icone">🏢</div>
+        <div class="secao-titulo">Dados da Empresa</div>
+      </div>
+      <div class="secao-corpo">
+        <div class="grid-2">
+          <div class="campo">
+            <label>CNPJ <span class="obrig">*</span></label>
+            <input type="text" id="cnpj" placeholder="00.000.000/0000-00" maxlength="18" oninput="mascaraCNPJ(this)">
+            <div class="msg-erro">CNPJ obrigatório</div>
+          </div>
+          <div class="campo">
+            <label>Razão Social <span class="obrig">*</span></label>
+            <input type="text" id="razao-social" placeholder="Nome da empresa">
+            <div class="msg-erro">Razão social obrigatória</div>
+          </div>
+          <div class="campo">
+            <label>CEP <span class="obrig">*</span></label>
+            <input type="text" id="cep" placeholder="00000-000" maxlength="9" oninput="mascaraCEP(this)" onblur="buscarCEP()">
+            <div class="msg-erro">CEP obrigatório</div>
+          </div>
+          <div class="campo">
+            <label>Endereço (Rua e Número) <span class="obrig">*</span></label>
+            <input type="text" id="endereco" placeholder="Rua das Flores, 123">
+            <div class="msg-erro">Endereço obrigatório</div>
+          </div>
+          <div class="campo">
+            <label>Complemento</label>
+            <input type="text" id="complemento" placeholder="Sala 2, Bloco A...">
+          </div>
+          <div class="campo">
+            <label>Bairro</label>
+            <input type="text" id="bairro" placeholder="">
+          </div>
+          <div class="campo">
+            <label>Cidade <span class="obrig">*</span></label>
+            <input type="text" id="cidade" placeholder="">
+            <div class="msg-erro">Cidade obrigatória</div>
+          </div>
+          <div class="campo">
+            <label>Estado <span class="obrig">*</span></label>
+            <select id="estado">
+              <option value="">Selecione</option>
+              <option>AC</option><option>AL</option><option>AM</option><option>AP</option>
+              <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+              <option>GO</option><option>MA</option><option>MG</option><option>MS</option>
+              <option>MT</option><option>PA</option><option>PB</option><option>PE</option>
+              <option>PI</option><option>PR</option><option>RJ</option><option>RN</option>
+              <option>RO</option><option>RR</option><option>RS</option><option>SC</option>
+              <option>SE</option><option>SP</option><option>TO</option>
+            </select>
+            <div class="msg-erro">Estado obrigatório</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="secao">
+      <div class="secao-header">
+        <div class="secao-icone">👤</div>
+        <div class="secao-titulo">Dados do Contato</div>
+      </div>
+      <div class="secao-corpo">
+        <div class="grid-2">
+          <div class="campo">
+            <label>Nome Completo <span class="obrig">*</span></label>
+            <input type="text" id="contato-nome" placeholder="Nome e sobrenome">
+            <div class="msg-erro">Nome obrigatório</div>
+          </div>
+          <div class="campo">
+            <label>CPF <span class="obrig">*</span></label>
+            <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)">
+            <div class="msg-erro">CPF obrigatório</div>
+          </div>
+          <div class="campo">
+            <label>E-mail <span class="obrig">*</span></label>
+            <input type="email" id="contato-email" placeholder="email@empresa.com">
+            <div class="msg-erro">E-mail obrigatório</div>
+          </div>
+          <div class="campo">
+            <label>Telefone <span class="obrig">*</span></label>
+            <input type="text" id="contato-tel" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)">
+            <div class="msg-erro">Telefone obrigatório</div>
+          </div>
+          <div class="campo">
+            <label>Telefone Adicional</label>
+            <input type="text" id="contato-tel2" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="secao">
+      <div class="secao-header">
+        <div class="secao-icone">📋</div>
+        <div class="secao-titulo">Informações do Pedido</div>
+      </div>
+      <div class="secao-corpo">
+        <div class="grid-2">
+          <div class="campo">
+            <label>Vendedora da Loja <span class="obrig">*</span></label>
+            <select id="vendedora-loja">
+              <option value="">Selecione a vendedora</option>
+            </select>
+            <div class="msg-erro">Selecione a vendedora</div>
+          </div>
+          <div class="campo">
+            <label>Loja <span class="obrig">*</span></label>
+            <select id="loja-select">
+              <option value="">Selecione a loja</option>
+            </select>
+            <div class="msg-erro">Selecione a loja</div>
+          </div>
+          <div class="campo col-span-2">
+            <label>Observações do Pedido</label>
+            <textarea id="obs-pedido" placeholder="Informações adicionais sobre o pedido..."></textarea>
+          </div>
+          <div class="campo col-span-2">
+            <label>Informação Importante</label>
+            <textarea id="info-importante" placeholder="Alguma informação importante que o time interno precisa saber..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TELA 2: PRODUTOS ===== -->
+  <div class="tela" id="tela-2">
+    <div class="secao" style="overflow:visible; position:relative; z-index:50;">
+      <div class="secao-header">
+        <div class="secao-icone">🔍</div>
+        <div class="secao-titulo">Buscar Produto</div>
+      </div>
+      <div class="secao-corpo" style="overflow:visible;">
+        <div class="busca-wrap" style="position:relative;">
+          <span class="busca-icone">🔍</span>
+          <input type="text" id="busca-input"
+            placeholder="Digite o nome ou SKU do produto..."
+            oninput="buscarProdutos(this.value)"
+            autocomplete="off"
+            style="font-size:15px; padding: 11px 14px 11px 38px; border-radius:8px;">
+          <div class="busca-resultados" id="busca-resultados"
+            style="position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:9999;
+                   background:var(--branco); border:1px solid var(--cinza-borda);
+                   border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.12);
+                   max-height:360px; overflow-y:auto; display:none;">
+          </div>
+        </div>
+        <div style="font-size:12px; color:var(--cinza-texto); margin-top:6px;">
+          Digite ao menos 2 caracteres para buscar no catálogo.
+        </div>
+      </div>
+    </div>
+
+    <div class="secao">
+      <div class="secao-header">
+        <div class="secao-icone">🛒</div>
+        <div class="secao-titulo">Itens do Orçamento</div>
+        <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+          <button class="btn-exportar" onclick="exportarOrcamento()" id="btn-exportar">
+            <span>⬇️</span> Exportar PDF
+          </button>
+        </div>
+      </div>
+      <div class="secao-corpo" style="padding:0;">
+        <div id="lista-itens">
+          <div class="itens-vazio">
+            <span>📦</span>
+            Nenhum produto adicionado ainda.<br>Use a busca acima para adicionar itens.
+          </div>
+        </div>
+      </div>
+      <div style="padding:14px 18px; border-top:1px solid var(--cinza-borda);">
+        <div class="totais-bar" id="totais-bar" style="display:none;">
+          <div class="total-item">
+            <div class="total-label">Total de Peças</div>
+            <div class="total-val" id="total-pecas">0</div>
+          </div>
+          <div class="total-item">
+            <div class="total-label">Subtotal</div>
+            <div class="total-val" id="total-valor">R$ 0,00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== TELA 3: PAGAMENTO ===== -->
+  <div class="tela" id="tela-3">
+    <div class="secao">
+      <div class="secao-header">
+        <div class="secao-icone">💳</div>
+        <div class="secao-titulo">Condição de Pagamento</div>
+      </div>
+      <div class="secao-corpo">
+        <div class="campo">
+          <label>Condição de Pagamento <span class="obrig">*</span></label>
+          <select id="condicao-pagamento" style="font-size:14px;">
+            <option value="">Selecione a condição</option>
+              <option value="001 - A VISTA (DEPOSITO)">001 - A VISTA (DEPOSITO)</option>
+              <option value="002 - 30/45/60 DIAS">002 - 30/45/60 DIAS</option>
+              <option value="003 - 30 DIAS">003 - 30 DIAS</option>
+              <option value="004 - 30 / 60 DIAS">004 - 30 / 60 DIAS</option>
+              <option value="005 - 30 / 60 / 90 DIAS">005 - 30 / 60 / 90 DIAS</option>
+              <option value="006 - ENT15 + 30 DIAS">006 - ENT15 + 30 DIAS</option>
+              <option value="012 - 30/60/90/120">012 - 30/60/90/120</option>
+              <option value="015 - 15 DIAS">015 - 15 DIAS</option>
+              <option value="049 - ENTRADA/ 30/ 60 DIAS">049 - ENTRADA/ 30/ 60 DIAS</option>
+              <option value="060 - 30/45/60/75/90 DIAS">060 - 30/45/60/75/90 DIAS</option>
+              <option value="080 - 28 DIAS">080 - 28 DIAS</option>
+              <option value="136 - 15/30/60 DIAS">136 - 15/30/60 DIAS</option>
+              <option value="15 - 15/30/45/60">15 - 15/30/45/60</option>
+              <option value="153 - 15/30 DIAS">153 - 15/30 DIAS</option>
+              <option value="212 - ENTRADA DEP. EM DINHEIRO / 30 / 60 DIAS">212 - ENTRADA DEP. EM DINHEIRO / 30 / 60 DIAS</option>
+              <option value="223 - 20/40/60/80 DIAS">223 - 20/40/60/80 DIAS</option>
+              <option value="246 - 20/40/60 DIAS">246 - 20/40/60 DIAS</option>
+              <option value="293 - 30/60/90 DIAS">293 - 30/60/90 DIAS</option>
+              <option value="30 - 15/30/45 DIAS">30 - 15/30/45 DIAS</option>
+              <option value="304 - 30/45 DIAS">304 - 30/45 DIAS</option>
+              <option value="4 - ENTRADA/30/60/90">4 - ENTRADA/30/60/90</option>
+              <option value="420 - ENTRADA/30/45 DIAS">420 - ENTRADA/30/45 DIAS</option>
+              <option value="451 - ENTRADA + 30 DIAS">451 - ENTRADA + 30 DIAS</option>
+              <option value="500 - CARTÃO DE CREDITO 1X">500 - CARTÃO DE CREDITO 1X</option>
+              <option value="501 - CARTÃO DE CREDITO 2X">501 - CARTÃO DE CREDITO 2X</option>
+              <option value="502 - CARTÃO DE CREDITO 3X">502 - CARTÃO DE CREDITO 3X</option>
+              <option value="503 - CARTÃO DE CREDITO 4X">503 - CARTÃO DE CREDITO 4X</option>
+              <option value="504 - CARTÃO DE CREDITO 6X">504 - CARTÃO DE CREDITO 6X</option>
+              <option value="506 - CARTÃO DE CREDITO 5X">506 - CARTÃO DE CREDITO 5X</option>
+              <option value="888 - CARTÃO DE DEBITO">888 - CARTÃO DE DEBITO</option>
+          </select>
+          <div class="msg-erro">Selecione a condição de pagamento</div>
+        </div>
+        <div class="campo" style="margin-top:8px;">
+          <label>Informações Adicionais</label>
+          <textarea id="dados-adicionais" placeholder="Dados de pagamento, comprovantes, observações gerais do pedido..." style="min-height:100px;"></textarea>
+          <div class="hint">Este campo vai para "Dados Adicionais" no HubSpot</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TELA 4: REVISÃO ===== -->
+  <div class="tela" id="tela-4">
+    <div class="secao">
+      <div class="secao-header">
+        <div class="secao-icone">📋</div>
+        <div class="secao-titulo">Revisão do Orçamento</div>
+        <div style="margin-left:auto;">
+          <button class="btn-exportar" onclick="exportarOrcamento()">
+            <span>⬇️</span> Exportar PDF
+          </button>
+        </div>
+      </div>
+      <div class="secao-corpo" id="revisao-conteudo">
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TELA 4: CONFIRMAÇÃO ===== -->
+  <div class="tela" id="tela-confirmacao">
+    <div class="confirmacao-wrap">
+      <div class="confirmacao-icone">✅</div>
+      <div class="confirmacao-titulo">Pedido enviado!</div>
+      <div class="confirmacao-sub">O orçamento foi criado no HubSpot e o time do atacado já pode dar continuidade ao atendimento.</div>
+      <div class="confirmacao-deal" id="confirmacao-deal">
+        Deal criado: <strong id="confirmacao-deal-nome"></strong>
+      </div>
+      <br>
+      <button class="btn btn-primario btn-lg" onclick="novoPedido()">+ Novo Pedido</button>
+    </div>
+  </div>
+
+  <!-- Rodapé de ações -->
+  <div class="rodape-acoes" id="rodape-acoes">
+    <button class="btn btn-secundario" id="btn-voltar" onclick="voltarTela()" style="display:none;">← Voltar</button>
+    <div style="margin-left:auto; display:flex; gap:10px; align-items:center;">
+      <span id="rodape-info" style="font-size:12px; color:var(--cinza-texto);"></span>
+      <button class="btn btn-primario" id="btn-avancar" onclick="avancarTela()">Próximo →</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+// ============================================================
+// CONFIGURAÇÃO — edite aqui
+// ============================================================
+const WORKER_URL = 'https://SEU-WORKER.workers.dev'; // <-- substitua pela URL do seu Worker
+
+// ============================================================
+// MODO DEMONSTRAÇÃO — para testar sem o Worker
+// Mude para false quando o Worker estiver no ar
+// ============================================================
+const MODO_DEMO = true;
+
+const PRODUTOS_DEMO = [
+  { id: '44918054983', nome: '08.26.0004 CAMISETA BASIC SEM PUNHO PRETA', sku: '08.26.0004', preco: 41.40, foto: null, tamanhos: 'P;M; G; GG;XG' },
+  { id: '45054960430', nome: '03.02.0175 Bota Brute Alfa Mid Tan', sku: '03.02.0175', preco: 529.99, foto: 'https://50832222.fs1.hubspotusercontent-na1.net/hubfs/50832222/brute%20tan.png', tamanhos: '35; 36; 37; 38; 39; 40; 41; 42; 43; 44; 45' },
+  { id: '45057005110', nome: '33.04.0030 BONE PPMG', sku: '33.04.0030', preco: 104.99, foto: null, tamanhos: 'M' },
+  { id: '44962798233', nome: '51.2.0009 DTF MANGA DIREITA', sku: '51.2.0009', preco: 25.00, foto: null, tamanhos: 'PP;P;M;G;GG;XG;XXG' },
+  { id: '45036135993', nome: '51.2.0010 DTF MANGA ESQUERDA', sku: '51.2.0010', preco: 25.00, foto: null, tamanhos: 'PP;P;M;G;GG;XG;XXG' },
+];
+
+// ============================================================
+// DADOS DAS LOJAS E VENDEDORAS (do HubSpot)
+// ============================================================
+const LOJAS = ["BETIM","GAMELEIRA","IPATINGA","JUIZ DE FORA","CONTAGEM","MONTES CLAROS","PLANALTO","PRADO","PRADO 2","SANTA EFIGENIA","UBERABA","UBERLANDIA","V2","V5","V6"];
+
+const VENDEDORAS = ["Adiele Stefanie","Adriana Dos Santos","Adriane Stellet","Alexia Marcela De Jesus","Alicia Fernanda","Aline Matias","Aline Vieira","Amanda Roberta","Ana Beatriz","Ana Clara Alves","Ana Clara Farias","Ana Paula Dos Santos","Andreia Geralda","Andressa Sabrina","Antonio Diogo","Ariana Antonia","Ariana Estefani Santos","Aruana Pacheco","Aylla Kamile","Barbara Wanny","Bianca Gomes","Bruna Dos Santos","Bruna Fernandes","Bruna Martins","Bruno Pereira","Caroline Ferreira","Celeste Rodrigues","Cristelle Carolline","Cynthia Celina","Daiane Aparecida","Dayse Thamara","Débora Monik","Ediene Valentim","Edineia Ribeiro","Elisangela Dos Santos","Elisangela Rute","Fernanda De Barros","Flávia Alessandra","Gessica Fernandes","Ingrid Fernandes Ferreira","Isabela Cristina","Isabela Da Silveira","Isabela Silva","Jaqueline Waleska","Jeruza Guedes","Josiane Costa","Joyce Mendes","Karen Cristina Soares","Keiciane Pereira","Kelly Cardoso","Kelly Priscila","Kenia Cristina","Kleydillane Paulo","Lara Alice","Lara Cristina","Laryssa Rodrigues","Leticia Grazielle","Leydiane Stefani Silva","Lilia Pedro","Lorraine Aparecida","Luana Vanessa","Marcus Vinicyus","Maria Eduarda Da Silva","Maria Eduarda Dias","Maria Eduarda Oliveira","Maria Julia","Mariana Eduarda","Mariana Ribeiro","Marliane Eugenia","Michelle Gonçalves","Michelle Rodrigues","Natália Helena","Nayara Vieira","Pamela Vitoria","Renata Cristina","Silvia Prado","Sulhyan Barbosa","Talita Emanuelle","Thamirys Pimentel","Vanielle Claudiorrane","Venda Futura","Vinicius Thadeu","Vitor Dos Santos","Viviane Sousa","Walleska Alexia","Wemerson Max","Yasmim Cristine"];
+
+// Estado da sessão
+let sessao = null;
+let telaAtual = 1;
+let itens = []; // [{produto, grade:{P:5, M:10...}, desconto:0, total, valorLiq}]
+let buscaTimeout = null;
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  // Preenche selects
+  const selVend = document.getElementById('vendedora-loja');
+  VENDEDORAS.forEach(v => {
+    const op = document.createElement('option');
+    op.value = v; op.textContent = v;
+    selVend.appendChild(op);
+  });
+  const selLoja = document.getElementById('loja-select');
+  LOJAS.forEach(l => {
+    const op = document.createElement('option');
+    op.value = l; op.textContent = l;
+    selLoja.appendChild(op);
+  });
+
+  // Enter no login
+  document.getElementById('login-senha').addEventListener('keydown', e => {
+    if (e.key === 'Enter') fazerLogin();
+  });
+
+  // Fecha busca ao clicar fora
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.busca-wrap')) {
+      document.getElementById('busca-resultados').style.display = 'none';
+    }
+  });
+});
+
+// ============================================================
+// LOGIN
+// ============================================================
+function fazerLogin() {
+  const usuario = document.getElementById('login-usuario').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  if (!usuario || !senha) return;
+
+  // MODO DEMO: aceita qualquer usuário/senha
+  if (MODO_DEMO) {
+    sessao = { usuario, loja: 'DEMO — ' + usuario.toUpperCase() };
+    document.getElementById('tela-login').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('badge-loja-header').textContent = sessao.loja;
+    document.getElementById('login-erro').style.display = 'none';
+    document.getElementById('banner-demo').style.display = 'block';
+    return;
+  }
+
+  mostrarLoading('Verificando...');
+
+  fetch(`${WORKER_URL}/auth/login`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ usuario, senha })
+  })
+  .then(r => r.json())
+  .then(data => {
+    ocultarLoading();
+    if (data.ok) {
+      sessao = { usuario, loja: data.loja };
+      document.getElementById('tela-login').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      document.getElementById('badge-loja-header').textContent = data.loja;
+      document.getElementById('login-erro').style.display = 'none';
+    } else {
+      document.getElementById('login-erro').style.display = 'block';
+    }
+  })
+  .catch(() => {
+    ocultarLoading();
+    document.getElementById('login-erro').textContent = 'Erro de conexão. Tente novamente.';
+    document.getElementById('login-erro').style.display = 'block';
+  });
+}
+
+function sair() {
+  sessao = null;
+  itens = [];
+  telaAtual = 1;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('tela-login').style.display = 'flex';
+  document.getElementById('login-usuario').value = '';
+  document.getElementById('login-senha').value = '';
+  irTela(1);
+}
+
+// ============================================================
+// NAVEGAÇÃO ENTRE TELAS
+// ============================================================
+function irTela(n) {
+  document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+
+  if (n === 1) document.getElementById('tela-1').classList.add('ativa');
+  else if (n === 2) document.getElementById('tela-2').classList.add('ativa');
+  else if (n === 3) document.getElementById('tela-3').classList.add('ativa');
+  else if (n === 4) {
+    document.getElementById('tela-4').classList.add('ativa');
+    renderizarRevisao();
+  }
+  else if (n === 5) {
+    document.getElementById('tela-confirmacao').classList.add('ativa');
+    document.getElementById('rodape-acoes').classList.add('oculto');
+    return;
+  }
+
+  telaAtual = n;
+  atualizarSteps();
+  atualizarRodape();
+  window.scrollTo(0, 0);
+}
+
+function avancarTela() {
+  if (telaAtual === 1) {
+    if (!validarTela1()) return;
+    irTela(2);
+  } else if (telaAtual === 2) {
+    if (itens.length === 0) {
+      alert('Adicione pelo menos um produto antes de continuar.');
+      return;
+    }
+    irTela(3);
+  } else if (telaAtual === 3) {
+    if (!validarTela3()) return;
+    irTela(4);
+  } else if (telaAtual === 4) {
+    enviarPedido();
+  }
+}
+
+function voltarTela() {
+  if (telaAtual > 1) irTela(telaAtual - 1);
+}
+
+function atualizarSteps() {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`step-${i}`);
+    if (!el) continue;
+    el.classList.remove('ativo', 'concluido');
+    if (i < telaAtual) el.classList.add('concluido');
+    else if (i === telaAtual) el.classList.add('ativo');
+
+    const sep = document.getElementById(`sep-${i}`);
+    if (sep) sep.classList.toggle('ativo', i < telaAtual);
+  }
+}
+
+function atualizarRodape() {
+  const btnVoltar = document.getElementById('btn-voltar');
+  const btnAvancar = document.getElementById('btn-avancar');
+  const info = document.getElementById('rodape-info');
+
+  btnVoltar.style.display = telaAtual > 1 ? 'inline-flex' : 'none';
+
+  if (telaAtual === 4) {
+    btnAvancar.textContent = '✅ Enviar para o Atacado';
+    btnAvancar.className = 'btn btn-verde btn-lg';
+    info.textContent = `${itens.length} produto(s) — ${formatarMoeda(calcularTotal())}`;
+  } else if (telaAtual === 2) {
+    btnAvancar.textContent = 'Próximo: Pagamento →';
+    btnAvancar.className = 'btn btn-primario';
+    info.textContent = itens.length > 0 ? `${itens.length} produto(s)` : '';
+  } else if (telaAtual === 3) {
+    btnAvancar.textContent = 'Revisar →';
+    btnAvancar.className = 'btn btn-primario';
+    info.textContent = '';
+  } else {
+    btnAvancar.textContent = 'Próximo →';
+    btnAvancar.className = 'btn btn-primario';
+    info.textContent = '';
+  }
+}
+
+// ============================================================
+// VALIDAÇÃO TELA 1
+// ============================================================
+function validarTela3() {
+  const sel = document.getElementById('condicao-pagamento');
+  const campo = sel.closest('.campo');
+  if (!sel.value) {
+    campo.classList.add('erro');
+    sel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return false;
+  }
+  campo.classList.remove('erro');
+  return true;
+}
+
+function validarTela1() {
+  let ok = true;
+  const obrig = ['cnpj','razao-social','cep','endereco','cidade','estado','contato-nome','cpf','contato-email','contato-tel','vendedora-loja','loja-select'];
+  obrig.forEach(id => {
+    const el = document.getElementById(id);
+    const campo = el.closest('.campo');
+    if (!el.value.trim()) {
+      campo.classList.add('erro');
+      ok = false;
+    } else {
+      campo.classList.remove('erro');
+    }
+  });
+  if (!ok) {
+    document.querySelector('.campo.erro').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  return ok;
+}
+
+// ============================================================
+// MÁSCARAS
+// ============================================================
+function mascaraCNPJ(el) {
+  let v = el.value.replace(/\D/g, '').substring(0, 14);
+  v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+  v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+  v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+  v = v.replace(/(\d{4})(\d)/, '$1-$2');
+  el.value = v;
+}
+
+function mascaraCPF(el) {
+  let v = el.value.replace(/\D/g, '').substring(0, 11);
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+  v = v.replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4');
+  el.value = v;
+}
+
+function mascaraTel(el) {
+  let v = el.value.replace(/\D/g, '').substring(0, 11);
+  if (v.length <= 10) v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+  else v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+  el.value = v;
+}
+
+function mascaraCEP(el) {
+  let v = el.value.replace(/\D/g, '').substring(0, 8);
+  v = v.replace(/(\d{5})(\d)/, '$1-$2');
+  el.value = v;
+}
+
+function buscarCEP() {
+  const cep = document.getElementById('cep').value.replace(/\D/g, '');
+  if (cep.length !== 8) return;
+  fetch(`https://viacep.com.br/ws/${cep}/json/`)
+    .then(r => r.json())
+    .then(d => {
+      if (!d.erro) {
+        document.getElementById('endereco').value = d.logradouro || '';
+        document.getElementById('bairro').value = d.bairro || '';
+        document.getElementById('cidade').value = d.localidade || '';
+        document.getElementById('estado').value = d.uf || '';
+      }
+    })
+    .catch(() => {});
+}
+
+// ============================================================
+// BUSCA DE PRODUTOS
+// ============================================================
+function buscarProdutos(q) {
+  clearTimeout(buscaTimeout);
+  const res = document.getElementById('busca-resultados');
+  if (q.length < 2) { res.style.display = 'none'; return; }
+
+  // MODO DEMO: filtra produtos locais
+  if (MODO_DEMO) {
+    const ql = q.toLowerCase();
+    const encontrados = PRODUTOS_DEMO.filter(p =>
+      p.nome.toLowerCase().includes(ql) || (p.sku && p.sku.toLowerCase().includes(ql))
+    );
+    renderizarResultados(encontrados);
+    return;
+  }
+
+  buscaTimeout = setTimeout(() => {
+    fetch(`${WORKER_URL}/produtos/busca?q=${encodeURIComponent(q)}`)
+      .then(r => r.json())
+      .then(data => {
+        renderizarResultados(data.produtos || []);
+      })
+      .catch(() => {
+        res.innerHTML = '<div class="busca-vazio">Erro ao buscar. Verifique a conexão.</div>';
+        res.classList.add('visivel');
+      });
+  }, 300);
+}
+
+function renderizarResultados(produtos) {
+  const res = document.getElementById('busca-resultados');
+  res.style.display = 'block';
+  if (produtos.length === 0) {
+    res.innerHTML = '<div class="busca-vazio">Nenhum produto encontrado.</div>';
+    return;
+  }
+
+  res.innerHTML = produtos.map(p => {
+    const foto = p.foto ? `<img src="${p.foto}" onerror="this.style.display='none'">` : '📦';
+    return `<div class="resultado-item" onclick='adicionarItem(${JSON.stringify(p)})'>
+      <div class="resultado-foto">${foto}</div>
+      <div class="resultado-info">
+        <div class="resultado-nome">${p.nome}</div>
+        <div class="resultado-sku">SKU: ${p.sku || '—'}</div>
+      </div>
+      <div class="resultado-preco">${formatarMoeda(p.preco)}</div>
+    </div>`;
+  }).join('');
+  res.classList.add('visivel');
+}
+
+// ============================================================
+// GERENCIAR ITENS
+// ============================================================
+function adicionarItem(produto) {
+  document.getElementById('busca-resultados').style.display = 'none';
+  document.getElementById('busca-input').value = '';
+
+  // Parsear tamanhos
+  const tamanhos = (produto.tamanhos || '').split(';').map(t => t.trim()).filter(Boolean);
+  if (tamanhos.length === 0) tamanhos.push('UN');
+
+  const grade = {};
+  tamanhos.forEach(t => grade[t] = 0);
+
+  itens.push({
+    id: Date.now(),
+    produto,
+    tamanhos,
+    grade,
+    obs: '',
+    totalPecas: 0,
+    valorLiq: 0
+  });
+
+  renderizarItens();
+  atualizarRodape();
+}
+
+function removerItem(id) {
+  itens = itens.filter(it => it.id !== id);
+  renderizarItens();
+  atualizarRodape();
+}
+
+function renderizarItens() {
+  const lista = document.getElementById('lista-itens');
+  const totaisBar = document.getElementById('totais-bar');
+
+  if (itens.length === 0) {
+    lista.innerHTML = `<div class="itens-vazio"><span>📦</span>Nenhum produto adicionado ainda.<br>Use a busca acima para adicionar itens.</div>`;
+    totaisBar.style.display = 'none';
+    return;
+  }
+
+  lista.innerHTML = itens.map(it => {
+    const foto = it.produto.foto
+      ? `<div class="item-foto"><img src="${it.produto.foto}" onerror="this.parentNode.innerHTML='📦'"></div>`
+      : `<div class="item-foto">📦</div>`;
+
+    const celulas = it.tamanhos.map(sz => `
+      <div class="grade-cel">
+        <label>${sz}</label>
+        <input type="number" min="0" value="${it.grade[sz] || 0}"
+          oninput="atualizarGrade(${it.id}, '${sz}', this.value)"
+          onkeydown="navegarGrade(event, ${it.id}, '${sz}')">
+      </div>
+    `).join('');
+
+    return `<div class="item-card" id="item-${it.id}">
+      <div class="item-card-header">
+        ${foto}
+        <div class="item-info">
+          <div class="item-nome">${it.produto.nome}</div>
+          <div class="item-sku">SKU: ${it.produto.sku || '—'}</div>
+        </div>
+        <div class="item-preco-unit">Preço unit.: ${formatarMoeda(it.produto.preco)}</div>
+        <button class="btn btn-perigo btn-sm" style="margin-left:8px;" onclick="removerItem(${it.id})">✕ Remover</button>
+      </div>
+      <div class="item-card-corpo">
+        <div class="grade-titulo">Grade de tamanhos</div>
+        <div class="grade-celulas">
+          ${celulas}
+          <div class="grade-total-wrap">
+            <div class="grade-total-label">Total</div>
+            <div class="grade-total-val" id="total-grade-${it.id}">${it.totalPecas} pcs</div>
+          </div>
+        </div>
+        <div class="item-rodape">
+          <div class="obs-produto-wrap" style="flex:1;">
+            <label style="font-size:12px;color:var(--cinza-texto);font-weight:600;display:block;margin-bottom:4px;">Observação do produto</label>
+            <input type="text" placeholder="Ex: bordado peito esquerdo, cor azul marinho..."
+              value="${it.obs || ''}"
+              style="width:100%;padding:7px 12px;border:1px solid var(--cinza-borda);border-radius:7px;font-size:13px;font-family:inherit;"
+              oninput="atualizarObs(${it.id}, this.value)">
+          </div>
+          <div class="item-valor-liq">
+            <div class="liq-label">Subtotal</div>
+            <div class="liq-val" id="liq-${it.id}">${formatarMoeda(it.valorLiq)}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  totaisBar.style.display = 'flex';
+  atualizarTotais();
+}
+
+function atualizarGrade(id, sz, val) {
+  const it = itens.find(i => i.id === id);
+  if (!it) return;
+  it.grade[sz] = parseInt(val) || 0;
+  it.totalPecas = Object.values(it.grade).reduce((a, b) => a + b, 0);
+  it.valorLiq = calcularValorLiq(it);
+  document.getElementById(`total-grade-${id}`).textContent = `${it.totalPecas} pcs`;
+  document.getElementById(`liq-${id}`).textContent = formatarMoeda(it.valorLiq);
+  atualizarTotais();
+}
+
+function atualizarObs(id, val) {
+  const it = itens.find(i => i.id === id);
+  if (!it) return;
+  it.obs = val;
+}
+
+function calcularValorLiq(it) {
+  return it.produto.preco * it.totalPecas;
+}
+
+function atualizarTotais() {
+  const totalPecas = itens.reduce((a, it) => a + it.totalPecas, 0);
+  const totalValor = calcularTotal();
+  document.getElementById('total-pecas').textContent = totalPecas;
+  document.getElementById('total-valor').textContent = formatarMoeda(totalValor);
+  atualizarRodape();
+}
+
+function calcularTotal() {
+  return itens.reduce((a, it) => a + it.valorLiq, 0);
+}
+
+// Tecla Tab/Enter navega entre células da grade
+function navegarGrade(event, itemId, szAtual) {
+  if (event.key !== 'Tab' && event.key !== 'Enter') return;
+  const it = itens.find(i => i.id === itemId);
+  if (!it) return;
+  const idx = it.tamanhos.indexOf(szAtual);
+  const proximo = it.tamanhos[idx + 1];
+  if (proximo) {
+    event.preventDefault();
+    const inputs = document.querySelectorAll(`#item-${itemId} .grade-cel input`);
+    if (inputs[idx + 1]) inputs[idx + 1].focus();
+  }
+}
+
+// ============================================================
+// REVISÃO
+// ============================================================
+function renderizarRevisao() {
+  const cnpj = document.getElementById('cnpj').value;
+  const razao = document.getElementById('razao-social').value;
+  const cep = document.getElementById('cep').value;
+  const end = document.getElementById('endereco').value;
+  const comp = document.getElementById('complemento').value;
+  const bairro = document.getElementById('bairro').value;
+  const cidade = document.getElementById('cidade').value;
+  const estado = document.getElementById('estado').value;
+  const nome = document.getElementById('contato-nome').value;
+  const cpf = document.getElementById('cpf').value;
+  const email = document.getElementById('contato-email').value;
+  const tel = document.getElementById('contato-tel').value;
+  const tel2 = document.getElementById('contato-tel2').value;
+  const vendedora = document.getElementById('vendedora-loja').value;
+  const loja = document.getElementById('loja-select').value;
+  const obs = document.getElementById('obs-pedido').value;
+  const info = document.getElementById('info-importante').value;
+
+  const endCompleto = [end, comp, bairro, cidade, estado, cep].filter(Boolean).join(', ');
+
+  const produtos = itens.map(it => {
+    const gradeHtml = it.tamanhos.filter(sz => it.grade[sz] > 0).map(sz =>
+      `<div class="rev-grade-cel"><span class="sz">${sz}</span><span class="qty">${it.grade[sz]}</span></div>`
+    ).join('');
+    const descInfo = it.desconto > 0 ? `Desconto: ${it.desconto}% — ` : '';
+    return `<div class="rev-produto">
+      <div class="rev-prod-header">
+        <div class="rev-prod-nome">${it.produto.nome}</div>
+        <div class="rev-prod-total">${formatarMoeda(it.valorLiq)}</div>
+      </div>
+      <div class="rev-grade">${gradeHtml || '<span style="font-size:12px;color:var(--cinza-texto)">Sem quantidades</span>'}</div>
+      <div class="rev-desc">${it.totalPecas} peças × ${formatarMoeda(it.produto.preco)}</div>
+      ${it.obs ? `<div class="rev-desc" style="color:var(--cinza-texto);font-style:italic;">📝 ${it.obs}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  document.getElementById('revisao-conteudo').innerHTML = `
+    <div class="rev-secao">
+      <div class="rev-titulo">Empresa</div>
+      <div class="rev-linha"><span class="rev-chave">Razão Social</span><span class="rev-val">${razao}</span></div>
+      <div class="rev-linha"><span class="rev-chave">CNPJ</span><span class="rev-val">${cnpj}</span></div>
+      <div class="rev-linha"><span class="rev-chave">Endereço</span><span class="rev-val" style="max-width:60%;text-align:right;">${endCompleto}</span></div>
+    </div>
+    <div class="rev-secao">
+      <div class="rev-titulo">Contato</div>
+      <div class="rev-linha"><span class="rev-chave">Nome</span><span class="rev-val">${nome}</span></div>
+      <div class="rev-linha"><span class="rev-chave">CPF</span><span class="rev-val">${cpf}</span></div>
+      <div class="rev-linha"><span class="rev-chave">E-mail</span><span class="rev-val">${email}</span></div>
+      <div class="rev-linha"><span class="rev-chave">Telefone</span><span class="rev-val">${tel}${tel2 ? ' / ' + tel2 : ''}</span></div>
+    </div>
+    <div class="rev-secao">
+      <div class="rev-titulo">Pedido</div>
+      <div class="rev-linha"><span class="rev-chave">Vendedora</span><span class="rev-val">${vendedora}</span></div>
+      <div class="rev-linha"><span class="rev-chave">Loja</span><span class="rev-val">${loja}</span></div>
+      ${obs ? `<div class="rev-linha"><span class="rev-chave">Observações</span><span class="rev-val" style="max-width:60%;text-align:right;">${obs}</span></div>` : ''}
+      ${info ? `<div class="rev-linha"><span class="rev-chave">Info. importante</span><span class="rev-val" style="max-width:60%;text-align:right;">${info}</span></div>` : ''}
+    </div>
+    <div class="rev-secao">
+      <div class="rev-titulo">Pagamento</div>
+      <div class="rev-linha"><span class="rev-chave">Condição</span><span class="rev-val">${document.getElementById('condicao-pagamento').value}</span></div>
+      ${document.getElementById('dados-adicionais').value ? `<div class="rev-linha"><span class="rev-chave">Inf. adicionais</span><span class="rev-val" style="max-width:60%;text-align:right;">${document.getElementById('dados-adicionais').value}</span></div>` : ''}
+    </div>
+    <div class="rev-secao">
+      <div class="rev-titulo">Produtos (${itens.length})</div>
+      ${produtos}
+      <div style="margin-top:14px; padding:14px; background:var(--vermelho-claro); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-weight:700; color:var(--vermelho);">Total do Orçamento</span>
+        <span style="font-size:22px; font-weight:800; color:var(--vermelho);">${formatarMoeda(calcularTotal())}</span>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// EXPORTAR PDF
+// ============================================================
+function exportarOrcamento() {
+  // Vai para tela de revisão antes de imprimir
+  if (telaAtual !== 3) {
+    renderizarRevisao();
+  }
+  setTimeout(() => window.print(), 100);
+}
+
+// ============================================================
+// ENVIAR PEDIDO
+// ============================================================
+function enviarPedido() {
+  mostrarLoading('Criando pedido no HubSpot...');
+
+  const payload = {
+    empresa: {
+      cnpj: document.getElementById('cnpj').value,
+      razao_social: document.getElementById('razao-social').value,
+      cep: document.getElementById('cep').value,
+      endereco: document.getElementById('endereco').value,
+      complemento: document.getElementById('complemento').value,
+      bairro: document.getElementById('bairro').value,
+      cidade: document.getElementById('cidade').value,
+      estado: document.getElementById('estado').value,
+    },
+    contato: {
+      nome: document.getElementById('contato-nome').value,
+      cpf: document.getElementById('cpf').value,
+      email: document.getElementById('contato-email').value,
+      telefone: document.getElementById('contato-tel').value,
+      telefone2: document.getElementById('contato-tel2').value,
+    },
+    pedido: {
+      vendedora_da_loja: document.getElementById('vendedora-loja').value,
+      loja: document.getElementById('loja-select').value,
+      obs: document.getElementById('obs-pedido').value,
+      info_importante: document.getElementById('info-importante').value,
+      condicao_de_pagamento: document.getElementById('condicao-pagamento').value,
+      dados_adicionais: document.getElementById('dados-adicionais').value,
+      valor_total: calcularTotal(),
+    },
+    itens: itens.map(it => ({
+      produto_id: it.produto.id,
+      nome: it.produto.nome,
+      sku: it.produto.sku,
+      preco: it.produto.preco,
+      quantidade: it.totalPecas,
+      valor_liquido: it.valorLiq,
+      obs: it.obs || '',
+      grade: it.grade
+    }))
+  };
+
+  // MODO DEMO: simula envio sem chamar o Worker
+  if (MODO_DEMO) {
+    setTimeout(() => {
+      ocultarLoading();
+      const nomeDeal = `${payload.empresa.razao_social} - Pedido Loja ${payload.pedido.loja} [DEMO]`;
+      document.getElementById('confirmacao-deal-nome').textContent = nomeDeal;
+      irTela(5);
+    }, 1200);
+    return;
+  }
+
+  fetch(`${WORKER_URL}/pedido/criar`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(data => {
+    ocultarLoading();
+    if (data.ok) {
+      document.getElementById('confirmacao-deal-nome').textContent = data.deal_nome;
+      irTela(5);
+    } else {
+      alert('Erro ao criar pedido: ' + (data.erro || 'erro desconhecido'));
+    }
+  })
+  .catch(() => {
+    ocultarLoading();
+    alert('Erro de conexão. Verifique a internet e tente novamente.');
+  });
+}
+
+// ============================================================
+// NOVO PEDIDO
+// ============================================================
+function novoPedido() {
+  itens = [];
+  telaAtual = 1;
+  // Limpa formulário
+  ['cnpj','razao-social','cep','endereco','complemento','bairro','cidade','contato-nome','cpf','contato-email','contato-tel','contato-tel2','obs-pedido','info-importante'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('estado').value = '';
+  document.getElementById('vendedora-loja').value = '';
+  document.getElementById('loja-select').value = '';
+  document.getElementById('condicao-pagamento').value = '';
+  document.getElementById('dados-adicionais').value = '';
+  renderizarItens();
+  document.getElementById('rodape-acoes').classList.remove('oculto');
+  irTela(1);
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function formatarMoeda(v) {
+  return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function mostrarLoading(txt) {
+  document.getElementById('loading-txt').textContent = txt || 'Processando...';
+  document.getElementById('loading').classList.add('visivel');
+}
+
+function ocultarLoading() {
+  document.getElementById('loading').classList.remove('visivel');
+}
+</script>
+</body>
+</html>
