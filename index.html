@@ -1335,7 +1335,7 @@ function renderizarItens() {
           </div>
           <div class="desconto-wrap">
             <label>Desconto %</label>
-            <input type="number" min="0" max="100" value="${it.desconto || 0}"
+            <input type="number" min="0" max="15" value="${it.desconto || 0}"
               style="width:72px;padding:7px 10px;border:1px solid var(--cinza-borda);border-radius:7px;font-size:14px;font-weight:600;text-align:center;font-family:inherit;"
               oninput="atualizarDesconto(${it.id}, this.value)">
           </div>
@@ -1372,7 +1372,7 @@ function atualizarObs(id, val) {
 function atualizarDesconto(id, val) {
   const it = itens.find(i => i.id === id);
   if (!it) return;
-  it.desconto = parseFloat(val) || 0;
+  it.desconto = Math.min(parseFloat(val) || 0, 15);
   it.valorLiq = calcularValorLiq(it);
   document.getElementById(`liq-${id}`).textContent = formatarMoeda(it.valorLiq);
   atualizarTotais();
