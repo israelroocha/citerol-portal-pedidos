@@ -1779,7 +1779,7 @@ function abrirRascunhos() {
         </div>
       `).join('');
     })
-    .catch(() => { container.innerHTML = '<div style="padding:20px;color:var(--vermelho);">Erro ao carregar rascunhos.</div>'; });
+    .catch(err => { container.innerHTML = `<div style="padding:20px;color:var(--vermelho);">Erro ao carregar: ${err.message || 'verifique o Worker'}</div>`; });
 }
 
 function fecharRascunhos() {
