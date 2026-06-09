@@ -466,63 +466,30 @@
   }
   .itens-vazio span { font-size: 36px; display: block; margin-bottom: 8px; }
 
-  /* ===== MODAL PEDIDOS ===== */
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.4);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 9000;
-    display: none;
-  }
-  .modal-overlay.visivel { display: flex; }
-  .modal {
-    background: var(--branco);
-    border-radius: 12px;
-    width: 90%; max-width: 680px;
-    max-height: 80vh;
-    display: flex; flex-direction: column;
-    box-shadow: 0 16px 40px rgba(0,0,0,0.15);
-  }
-  .modal-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--cinza-borda);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .modal-titulo { font-size: 15px; font-weight: 700; }
-  .modal-fechar {
-    background: none; border: none; font-size: 20px; cursor: pointer;
-    color: var(--cinza-texto); padding: 4px 8px; border-radius: 6px;
-  }
-  .modal-fechar:hover { background: var(--cinza-bg); }
-  .modal-corpo { padding: 16px 20px; overflow-y: auto; flex: 1; }
-
-  .pedido-hist {
-    background: var(--cinza-bg);
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-bottom: 8px;
-    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-  }
-  .pedido-hist-info { flex: 1; min-width: 200px; }
-  .pedido-hist-nome { font-weight: 700; font-size: 13px; }
-  .pedido-hist-data { font-size: 11px; color: var(--cinza-texto); }
-  .pedido-hist-detalhes { font-size: 12px; color: var(--cinza-texto); }
-  .pedido-hist-valor { font-weight: 700; font-size: 15px; color: var(--vermelho); white-space: nowrap; }
-  .pedido-hist-badge {
-    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
-    background: var(--verde-bg); color: var(--verde);
-  }
-  .pedidos-vazio { text-align: center; padding: 32px; color: var(--cinza-texto); font-size: 13px; }
-  .btn-limpar-hist {
-    font-size: 11px; color: var(--cinza-texto); background: none; border: none;
-    cursor: pointer; text-decoration: underline; margin-top: 8px;
-  }
-
   @media (max-width: 600px) {
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
     .col-span-2 { grid-column: span 1; }
     .steps-bar { overflow-x: auto; }
   }
+
+  /* ===== MODAL RASCUNHOS ===== */
+  .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:9000; }
+  .modal-overlay.visivel { display:flex; }
+  .modal { background:var(--branco);border-radius:12px;width:90%;max-width:700px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 16px 40px rgba(0,0,0,0.18); }
+  .modal-header { padding:16px 20px;border-bottom:1px solid var(--cinza-borda);display:flex;align-items:center;justify-content:space-between; }
+  .modal-titulo { font-size:15px;font-weight:700; }
+  .modal-fechar { background:none;border:none;font-size:20px;cursor:pointer;color:var(--cinza-texto);padding:4px 8px;border-radius:6px;font-family:inherit; }
+  .modal-fechar:hover { background:var(--cinza-bg); }
+  .modal-corpo { padding:16px 20px;overflow-y:auto;flex:1; }
+  .rascunho-card { background:var(--cinza-bg);border-radius:8px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap; }
+  .rascunho-info { flex:1;min-width:180px; }
+  .rascunho-nome { font-weight:700;font-size:13px; }
+  .rascunho-meta { font-size:11px;color:var(--cinza-texto);margin-top:2px; }
+  .rascunho-valor { font-weight:700;font-size:15px;color:var(--vermelho);white-space:nowrap; }
+  .rascunho-acoes { display:flex;gap:6px; }
+  .banner-rascunho { background:var(--azul-bg);border-bottom:1px solid #85B7EB;padding:8px 24px;font-size:12px;color:var(--azul);display:none;align-items:center;gap:8px;justify-content:space-between; }
+  .banner-rascunho.visivel { display:flex; }
+  .banner-rascunho strong { font-weight:700; }
 
   /* ===== PRINT / PDF ===== */
   @media print {
@@ -571,11 +538,18 @@
     ⚠️ <strong>Modo demonstração ativo</strong> — login e produtos são simulados, o pedido <strong>não será enviado</strong> ao HubSpot. Para ativar de verdade, configure o Worker e mude <code>MODO_DEMO = false</code>.
   </div>
 
+  <!-- Banner rascunho ativo -->
+  <div class="banner-rascunho" id="banner-rascunho">
+    <span>✏️ Editando rascunho: <strong id="banner-rascunho-nome"></strong></span>
+    <button onclick="cancelarEdicaoRascunho()" style="background:none;border:1px solid #85B7EB;border-radius:6px;padding:3px 10px;font-size:11px;color:var(--azul);cursor:pointer;font-family:inherit;">Cancelar edição</button>
+  </div>
+
   <!-- Header -->
   <div class="header">
     <div class="header-logo">Pedido de Uniformes <span>Corporativo</span></div>
     <div class="header-info">
-      <button class="btn-sair" onclick="abrirPedidos()" style="font-weight:600;">📋 Meus Pedidos</button>
+      <button class="btn-sair" onclick="abrirRascunhos()" style="font-weight:600;">📂 Em Aberto</button>
+      <button class="btn-sair" onclick="abrirPedidos()" style="font-weight:600;">📋 Enviados</button>
       <div class="badge-loja" id="badge-loja-header"></div>
       <button class="btn-sair" onclick="sair()">Sair</button>
     </div>
@@ -867,6 +841,28 @@
     </div>
   </div>
 
+  <!-- Modal Orçamentos em Aberto -->
+  <div class="modal-overlay" id="modal-rascunhos">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-titulo">📂 Orçamentos em Aberto</div>
+        <button class="modal-fechar" onclick="fecharRascunhos()">✕</button>
+      </div>
+      <div class="modal-corpo" id="lista-rascunhos-modal"></div>
+    </div>
+  </div>
+
+  <!-- Modal Enviados (histórico) -->
+  <div class="modal-overlay" id="modal-pedidos">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-titulo">📋 Pedidos Enviados</div>
+        <button class="modal-fechar" onclick="fecharPedidos()">✕</button>
+      </div>
+      <div class="modal-corpo" id="lista-pedidos-hist"></div>
+    </div>
+  </div>
+
   <!-- ===== TELA 4: CONFIRMAÇÃO ===== -->
   <div class="tela" id="tela-confirmacao">
     <div class="confirmacao-wrap">
@@ -890,31 +886,19 @@
     </div>
   </div>
 
-  <!-- Modal Meus Pedidos -->
-  <div class="modal-overlay" id="modal-pedidos">
-    <div class="modal">
-      <div class="modal-header">
-        <div class="modal-titulo">📋 Pedidos Enviados</div>
-        <button class="modal-fechar" onclick="fecharPedidos()">✕</button>
-      </div>
-      <div class="modal-corpo" id="lista-pedidos-hist">
-      </div>
-    </div>
-  </div>
-
 </div><!-- /app -->
 
 <script>
 // ============================================================
 // CONFIGURAÇÃO — edite aqui
 // ============================================================
-const WORKER_URL = 'https://citerol-portal-loja.israel-caetano-lima.workers.dev'; // <-- substitua pela URL do seu Worker
+const WORKER_URL = 'https://SEU-WORKER.workers.dev'; // <-- substitua pela URL do seu Worker
 
 // ============================================================
 // MODO DEMONSTRAÇÃO — para testar sem o Worker
 // Mude para false quando o Worker estiver no ar
 // ============================================================
-const MODO_DEMO = false;
+const MODO_DEMO = true;
 
 const PRODUTOS_DEMO = [
   { id: '44918054983', nome: '08.26.0004 CAMISETA BASIC SEM PUNHO PRETA', sku: '08.26.0004', preco: 41.40, foto: null, tamanhos: 'P;M; G; GG;XG' },
@@ -936,6 +920,8 @@ let sessao = null;
 let telaAtual = 1;
 let itens = []; // [{produto, grade:{P:5, M:10...}, desconto:0, total, valorLiq}]
 let buscaTimeout = null;
+let rascunhoAtivo = null;
+let rascunhoAtivo = null; // { id, nome } quando editando rascunho
 
 // ============================================================
 // INICIALIZAÇÃO
@@ -1096,7 +1082,22 @@ function atualizarRodape() {
     btnAvancar.textContent = '✅ Enviar para o Atacado';
     btnAvancar.className = 'btn btn-verde btn-lg';
     info.textContent = `${itens.length} produto(s) — ${formatarMoeda(calcularTotal())}`;
-  } else if (telaAtual === 2) {
+    // Adiciona botão salvar rascunho
+    let btnSalvar = document.getElementById('btn-salvar-rascunho');
+    if (!btnSalvar) {
+      btnSalvar = document.createElement('button');
+      btnSalvar.id = 'btn-salvar-rascunho';
+      btnSalvar.className = 'btn btn-secundario';
+      btnSalvar.style.cssText = 'background:var(--azul-bg);color:var(--azul);border-color:#85B7EB;';
+      btnSalvar.textContent = '💾 Salvar Rascunho';
+      btnSalvar.onclick = salvarRascunhoPortal;
+      btnAvancar.parentNode.insertBefore(btnSalvar, btnAvancar);
+    }
+  } else {
+    const btnSalvarEx = document.getElementById('btn-salvar-rascunho');
+    if (btnSalvarEx) btnSalvarEx.remove();
+  }
+  if (telaAtual === 2) {
     btnAvancar.textContent = 'Próximo: Pagamento →';
     btnAvancar.className = 'btn btn-primario';
     info.textContent = itens.length > 0 ? `${itens.length} produto(s)` : '';
@@ -1333,11 +1334,13 @@ function renderizarItens() {
               style="width:100%;padding:7px 12px;border:1px solid var(--cinza-borda);border-radius:7px;font-size:13px;font-family:inherit;"
               oninput="atualizarObs(${it.id}, this.value)">
           </div>
-          <div class="desconto-wrap">
-            <label>Desconto %</label>
-            <input type="number" min="0" max="15" value="${it.desconto || 0}"
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+            <label style="font-size:12px;color:var(--cinza-texto);font-weight:600;">Desconto %</label>
+            <input type="number" min="0" max="3" id="desc-input-${it.id}"
+              value="${it.desconto || 0}"
               style="width:72px;padding:7px 10px;border:1px solid var(--cinza-borda);border-radius:7px;font-size:14px;font-weight:600;text-align:center;font-family:inherit;"
               oninput="atualizarDesconto(${it.id}, this.value)">
+            <div id="desc-err-${it.id}" style="font-size:10px;color:var(--vermelho);display:none;white-space:nowrap;">⚠ Máximo: 3%</div>
           </div>
           <div class="item-valor-liq">
             <div class="liq-label">Subtotal</div>
@@ -1370,17 +1373,27 @@ function atualizarObs(id, val) {
 }
 
 function atualizarDesconto(id, val) {
-  const it = itens.find(i => i.id === id);
+  const it      = itens.find(i => i.id === id);
   if (!it) return;
-  it.desconto = Math.min(parseFloat(val) || 0, 15);
+  const v       = parseFloat(val) || 0;
+  const errEl   = document.getElementById(`desc-err-${id}`);
+  const inputEl = document.getElementById(`desc-input-${id}`);
+  if (v > 3) {
+    if (errEl)   errEl.style.display    = 'block';
+    if (inputEl) inputEl.style.borderColor = 'var(--vermelho)';
+    it.desconto = 3;
+  } else {
+    if (errEl)   errEl.style.display    = 'none';
+    if (inputEl) inputEl.style.borderColor = '';
+    it.desconto = v;
+  }
   it.valorLiq = calcularValorLiq(it);
   document.getElementById(`liq-${id}`).textContent = formatarMoeda(it.valorLiq);
   atualizarTotais();
 }
 
 function calcularValorLiq(it) {
-  const bruto = it.produto.preco * it.totalPecas;
-  return bruto * (1 - (it.desconto || 0) / 100);
+  return it.produto.preco * it.totalPecas * (1 - (it.desconto || 0) / 100);
 }
 
 function atualizarTotais() {
@@ -1444,7 +1457,7 @@ function renderizarRevisao() {
         <div class="rev-prod-total">${formatarMoeda(it.valorLiq)}</div>
       </div>
       <div class="rev-grade">${gradeHtml || '<span style="font-size:12px;color:var(--cinza-texto)">Sem quantidades</span>'}</div>
-      <div class="rev-desc">${it.totalPecas} peças × ${formatarMoeda(it.produto.preco)}${it.desconto > 0 ? ` — Desconto: ${it.desconto}%` : ''}</div>
+      <div class="rev-desc">${it.totalPecas} peças × ${formatarMoeda(it.produto.preco)}</div>
       ${it.obs ? `<div class="rev-desc" style="color:var(--cinza-texto);font-style:italic;">📝 ${it.obs}</div>` : ''}
     </div>`;
   }).join('');
@@ -1531,15 +1544,17 @@ function enviarPedido() {
       valor_total: calcularTotal(),
     },
     itens: itens.map(it => ({
-      produto_id: it.produto.id,
-      nome: it.produto.nome,
-      sku: it.produto.sku,
-      preco: it.produto.preco,
-      quantidade: it.totalPecas,
-      desconto: it.desconto || 0,
+      produto_id:    it.produto.id,
+      nome:          it.produto.nome,
+      sku:           it.produto.sku,
+      preco:         it.produto.preco,
+      foto:          it.produto.foto || null,
+      tamanhos_lista: it.tamanhos.join(';'),
+      quantidade:    it.totalPecas,
+      desconto:      it.desconto || 0,
       valor_liquido: it.valorLiq,
-      obs: it.obs || '',
-      grade: it.grade
+      obs:           it.obs || '',
+      grade:         it.grade
     }))
   };
 
@@ -1549,21 +1564,26 @@ function enviarPedido() {
       ocultarLoading();
       const nomeDeal = `${payload.empresa.razao_social} - Pedido Loja ${payload.pedido.loja} [DEMO]`;
       document.getElementById('confirmacao-deal-nome').textContent = nomeDeal;
-      salvarPedidoHistorico(nomeDeal, payload.pedido.valor_total, payload.pedido.loja, payload.itens.length);
       irTela(5);
     }, 1200);
     return;
   }
 
-  fetch(`${WORKER_URL}/pedido/criar`, {
+  const urlEnvio = rascunhoAtivo
+    ? `${WORKER_URL}/rascunho/enviar/${rascunhoAtivo.id}`
+    : `${WORKER_URL}/pedido/criar`;
+  const bodyEnvio = rascunhoAtivo ? '{}' : JSON.stringify(payload);
+
+  fetch(urlEnvio, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(payload)
+    body: bodyEnvio
   })
   .then(r => r.json())
   .then(data => {
     ocultarLoading();
     if (data.ok) {
+      rascunhoAtivo = null;
       document.getElementById('confirmacao-deal-nome').textContent = data.deal_nome;
       salvarPedidoHistorico(data.deal_nome, payload.pedido.valor_total, payload.pedido.loja, payload.itens.length);
       irTela(5);
@@ -1583,6 +1603,8 @@ function enviarPedido() {
 function novoPedido() {
   itens = [];
   telaAtual = 1;
+  rascunhoAtivo = null;
+  document.getElementById('banner-rascunho').classList.remove('visivel');
   // Limpa formulário
   ['cnpj','razao-social','cep','endereco','complemento','bairro','cidade','contato-nome','cpf','contato-email','contato-tel','contato-tel2','obs-pedido','info-importante'].forEach(id => {
     document.getElementById(id).value = '';
@@ -1613,58 +1635,205 @@ function ocultarLoading() {
   document.getElementById('loading').classList.remove('visivel');
 }
 // ============================================================
-// HISTÓRICO DE PEDIDOS (localStorage)
+// RASCUNHOS
 // ============================================================
-function salvarPedidoHistorico(dealNome, total, loja, itensCount) {
-  try {
-    const hist = JSON.parse(localStorage.getItem('citerol_pedidos') || '[]');
-    hist.unshift({
-      nome: dealNome,
-      data: new Date().toLocaleString('pt-BR'),
-      total: total,
-      loja: loja,
-      itens: itensCount
-    });
-    // Manter só os últimos 50
-    if (hist.length > 50) hist.length = 50;
-    localStorage.setItem('citerol_pedidos', JSON.stringify(hist));
-  } catch(e) {}
+function montarPayload() {
+  return {
+    empresa: {
+      cnpj:        document.getElementById('cnpj').value,
+      razao_social:document.getElementById('razao-social').value,
+      cep:         document.getElementById('cep').value,
+      endereco:    document.getElementById('endereco').value,
+      complemento: document.getElementById('complemento').value,
+      bairro:      document.getElementById('bairro').value,
+      cidade:      document.getElementById('cidade').value,
+      estado:      document.getElementById('estado').value,
+    },
+    contato: {
+      nome:      document.getElementById('contato-nome').value,
+      cpf:       document.getElementById('cpf').value,
+      email:     document.getElementById('contato-email').value,
+      telefone:  document.getElementById('contato-tel').value,
+      telefone2: document.getElementById('contato-tel2').value,
+    },
+    pedido: {
+      vendedora_da_loja:    document.getElementById('vendedora-loja').value,
+      loja:                 document.getElementById('loja-select').value,
+      obs:                  document.getElementById('obs-pedido').value,
+      info_importante:      document.getElementById('info-importante').value,
+      condicao_de_pagamento:document.getElementById('condicao-pagamento').value,
+      dados_adicionais:     document.getElementById('dados-adicionais').value,
+      valor_total:          calcularTotal(),
+    },
+    itens: itens.map(it => ({
+      produto_id:    it.produto.id,
+      nome:          it.produto.nome,
+      sku:           it.produto.sku,
+      preco:         it.produto.preco,
+      foto:          it.produto.foto || null,
+      tamanhos_lista:it.tamanhos.join(';'),
+      quantidade:    it.totalPecas,
+      desconto:      it.desconto || 0,
+      valor_liquido: it.valorLiq,
+      obs:           it.obs || '',
+      grade:         it.grade
+    }))
+  };
 }
 
-function abrirPedidos() {
-  const container = document.getElementById('lista-pedidos-hist');
-  let hist = [];
-  try { hist = JSON.parse(localStorage.getItem('citerol_pedidos') || '[]'); } catch(e) {}
+function salvarRascunhoPortal() {
+  if (itens.length === 0) { alert('Adicione pelo menos um produto antes de salvar.'); return; }
+  mostrarLoading('Salvando rascunho...');
+  const payload = { ...montarPayload() };
+  if (rascunhoAtivo) payload.rascunhoId = rascunhoAtivo.id;
 
-  if (hist.length === 0) {
-    container.innerHTML = '<div class="pedidos-vazio"><span style="font-size:36px;display:block;margin-bottom:8px;">📋</span>Nenhum pedido enviado ainda neste navegador.</div>';
-  } else {
-    container.innerHTML = hist.map(p => `
-      <div class="pedido-hist">
-        <div class="pedido-hist-info">
-          <div class="pedido-hist-nome">${p.nome}</div>
-          <div class="pedido-hist-data">${p.data}</div>
-          <div class="pedido-hist-detalhes">${p.itens} produto(s) — ${p.loja}</div>
+  fetch(`${WORKER_URL}/rascunho/salvar`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(data => {
+    ocultarLoading();
+    if (data.ok) {
+      rascunhoAtivo = { id: data.rascunho_id, nome: data.rascunho_nome };
+      document.getElementById('banner-rascunho-nome').textContent = data.rascunho_nome.replace('[RASCUNHO] ','');
+      document.getElementById('banner-rascunho').classList.add('visivel');
+      alert('Rascunho salvo! Você pode fechar o portal e continuar depois.');
+    } else {
+      alert('Erro ao salvar: ' + (data.erro || 'desconhecido'));
+    }
+  })
+  .catch(() => { ocultarLoading(); alert('Erro de conexão.'); });
+}
+
+function cancelarEdicaoRascunho() {
+  if (!confirm('Cancelar edição? O rascunho salvo no HubSpot não será alterado.')) return;
+  rascunhoAtivo = null;
+  document.getElementById('banner-rascunho').classList.remove('visivel');
+}
+
+function abrirRascunhos() {
+  const loja = sessao ? sessao.loja : '';
+  const container = document.getElementById('lista-rascunhos-modal');
+  container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-texto);">Carregando...</div>';
+  document.getElementById('modal-rascunhos').classList.add('visivel');
+
+  fetch(`${WORKER_URL}/rascunho/listar?loja=${encodeURIComponent(loja)}`)
+    .then(r => r.json())
+    .then(data => {
+      const lista = data.rascunhos || [];
+      if (lista.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--cinza-texto);"><span style="font-size:36px;display:block;margin-bottom:8px;">📂</span>Nenhum orçamento em aberto para esta loja.</div>';
+        return;
+      }
+      container.innerHTML = lista.map(r => `
+        <div class="rascunho-card">
+          <div class="rascunho-info">
+            <div class="rascunho-nome">${r.nome.replace('[RASCUNHO] ','')}</div>
+            <div class="rascunho-meta">${r.vendedora || '—'} · Atualizado: ${new Date(r.data).toLocaleString('pt-BR')}</div>
+          </div>
+          <div class="rascunho-valor">${formatarMoeda(r.valor)}</div>
+          <div class="rascunho-acoes">
+            <button class="btn btn-primario btn-sm" onclick="editarRascunho('${r.id}','${r.nome.replace(/'/g,"\'")}')">✏️ Editar</button>
+            <button class="btn btn-perigo btn-sm" onclick="deletarRascunhoPortal('${r.id}', this)">🗑️</button>
+          </div>
         </div>
-        <div class="pedido-hist-valor">${formatarMoeda(p.total)}</div>
-        <div class="pedido-hist-badge">Enviado ✓</div>
-      </div>
-    `).join('') + '<div style="text-align:center;"><button class="btn-limpar-hist" onclick="limparHistorico()">Limpar histórico</button></div>';
+      `).join('');
+    })
+    .catch(() => { container.innerHTML = '<div style="padding:20px;color:var(--vermelho);">Erro ao carregar rascunhos.</div>'; });
+}
+
+function fecharRascunhos() {
+  document.getElementById('modal-rascunhos').classList.remove('visivel');
+}
+
+function editarRascunho(id, nome) {
+  mostrarLoading('Carregando rascunho...');
+  fetch(`${WORKER_URL}/rascunho/${id}`)
+    .then(r => r.json())
+    .then(data => {
+      ocultarLoading();
+      fecharRascunhos();
+      if (!data.ok) { alert('Erro ao carregar: ' + (data.erro || '')); return; }
+      preencherFormulario(data.dados);
+      rascunhoAtivo = { id, nome };
+      document.getElementById('banner-rascunho-nome').textContent = nome.replace('[RASCUNHO] ','');
+      document.getElementById('banner-rascunho').classList.add('visivel');
+      irTela(1);
+    })
+    .catch(() => { ocultarLoading(); alert('Erro de conexão.'); });
+}
+
+function deletarRascunhoPortal(id, btn) {
+  if (!confirm('Excluir este rascunho definitivamente?')) return;
+  btn.disabled = true; btn.textContent = '...';
+  fetch(`${WORKER_URL}/rascunho/deletar/${id}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' })
+    .then(r => r.json())
+    .then(() => abrirRascunhos())
+    .catch(() => { btn.disabled = false; btn.textContent = '🗑️'; alert('Erro ao deletar.'); });
+}
+
+function preencherFormulario(dados) {
+  const { empresa, contato, pedido, itens: itensData } = dados;
+
+  // Empresa
+  if (empresa) {
+    ['cnpj','razao-social','cep','endereco','complemento','bairro','cidade'].forEach(id => {
+      const map = {'cnpj':'cnpj','razao-social':'razao_social','cep':'cep','endereco':'endereco',
+        'complemento':'complemento','bairro':'bairro','cidade':'cidade'};
+      const el = document.getElementById(id);
+      if (el && empresa[map[id]] !== undefined) el.value = empresa[map[id]];
+    });
+    const estadoEl = document.getElementById('estado');
+    if (estadoEl && empresa.estado) estadoEl.value = empresa.estado;
   }
 
-  document.getElementById('modal-pedidos').classList.add('visivel');
-}
+  // Contato
+  if (contato) {
+    const mapC = {'contato-nome':'nome','cpf':'cpf','contato-email':'email',
+      'contato-tel':'telefone','contato-tel2':'telefone2'};
+    Object.entries(mapC).forEach(([id, key]) => {
+      const el = document.getElementById(id);
+      if (el && contato[key] !== undefined) el.value = contato[key] || '';
+    });
+  }
 
-function fecharPedidos() {
-  document.getElementById('modal-pedidos').classList.remove('visivel');
-}
+  // Pedido
+  if (pedido) {
+    const mapP = {'vendedora-loja':'vendedora_da_loja','loja-select':'loja',
+      'obs-pedido':'obs','info-importante':'info_importante',
+      'condicao-pagamento':'condicao_de_pagamento','dados-adicionais':'dados_adicionais'};
+    Object.entries(mapP).forEach(([id, key]) => {
+      const el = document.getElementById(id);
+      if (el && pedido[key] !== undefined) el.value = pedido[key] || '';
+    });
+  }
 
-function limparHistorico() {
-  if (confirm('Limpar todo o histórico de pedidos deste navegador?')) {
-    localStorage.removeItem('citerol_pedidos');
-    abrirPedidos();
+  // Itens
+  if (itensData && itensData.length > 0) {
+    itens = itensData.map(item => {
+      const tamanhos = (item.tamanhos_lista || '').split(';').map(t => t.trim()).filter(Boolean);
+      if (tamanhos.length === 0 && item.grade) tamanhos.push(...Object.keys(item.grade));
+      return {
+        id:       Date.now() + Math.random(),
+        produto:  { id: item.produto_id, nome: item.nome, sku: item.sku, preco: item.preco, foto: item.foto || null, tamanhos: item.tamanhos_lista || '' },
+        tamanhos,
+        grade:    item.grade || {},
+        obs:      item.obs || '',
+        desconto: item.desconto || 0,
+        totalPecas: item.quantidade || 0,
+        valorLiq:   item.valor_liquido || 0
+      };
+    });
+    renderizarItens();
   }
 }
+
+// ============================================================
+// NOVOPEDIDO: limpar rascunho ativo
+// ============================================================
+
 </script>
 </body>
 </html>
