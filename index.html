@@ -548,7 +548,7 @@
   <div class="header">
     <div class="header-logo">Pedido de Uniformes <span>Corporativo</span></div>
     <div class="header-info">
-      <button class="btn-sair" onclick="abrirRascunhos()" style="font-weight:600;">📂 Em Aberto</button>
+      <button class="btn-sair" onclick="irHome()" style="font-weight:600;">🏠 Início</button>
       <button class="btn-sair" onclick="abrirPedidos()" style="font-weight:600;">📋 Enviados</button>
       <div class="badge-loja" id="badge-loja-header"></div>
       <button class="btn-sair" onclick="sair()">Sair</button>
@@ -578,8 +578,22 @@
     </div>
   </div>
 
+  <!-- ===== TELA HOME (Dashboard) ===== -->
+  <div class="tela" id="tela-home" style="max-width:900px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+      <div>
+        <h1 style="font-size:22px; font-weight:800; color:var(--texto);">Orçamentos em Aberto</h1>
+        <p style="font-size:13px; color:var(--cinza-texto); margin-top:2px;">Rascunhos salvos da sua loja. Continue de onde parou ou crie um novo.</p>
+      </div>
+      <button class="btn btn-primario btn-lg" onclick="iniciarNovoOrcamento()">+ Realizar Orçamento</button>
+    </div>
+    <div id="home-lista-rascunhos">
+      <div style="text-align:center; padding:48px; color:var(--cinza-texto);">Carregando...</div>
+    </div>
+  </div>
+
   <!-- ===== TELA 1: CLIENTE ===== -->
-  <div class="tela ativa" id="tela-1">
+  <div class="tela" id="tela-1">
 
     <div class="secao">
       <div class="secao-header">
@@ -873,7 +887,7 @@
         Deal criado: <strong id="confirmacao-deal-nome"></strong>
       </div>
       <br>
-      <button class="btn btn-primario btn-lg" onclick="novoPedido()">+ Novo Pedido</button>
+      <button class="btn btn-primario btn-lg" onclick="novoPedido()">🏠 Voltar ao Início</button>
     </div>
   </div>
 
@@ -969,6 +983,7 @@ function fazerLogin() {
     document.getElementById('badge-loja-header').textContent = sessao.loja;
     document.getElementById('login-erro').style.display = 'none';
     document.getElementById('banner-demo').style.display = 'block';
+    irHome();
     return;
   }
 
@@ -988,6 +1003,7 @@ function fazerLogin() {
       document.getElementById('app').style.display = 'block';
       document.getElementById('badge-loja-header').textContent = data.loja;
       document.getElementById('login-erro').style.display = 'none';
+      irHome();
     } else {
       document.getElementById('login-erro').style.display = 'block';
     }
@@ -1013,6 +1029,88 @@ function sair() {
 // ============================================================
 // NAVEGAÇÃO ENTRE TELAS
 // ============================================================
+function irHome() {
+  // Esconde steps e rodapé, mostra dashboard
+  document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+  document.getElementById('tela-home').classList.add('ativa');
+  document.getElementById('steps-bar').style.display = 'none';
+  document.getElementById('rodape-acoes').classList.add('oculto');
+  document.getElementById('banner-rascunho').classList.remove('visivel');
+  rascunhoAtivo = null;
+  carregarHomeRascunhos();
+  window.scrollTo(0, 0);
+}
+
+function carregarHomeRascunhos() {
+  const loja = sessao ? sessao.loja : '';
+  const container = document.getElementById('home-lista-rascunhos');
+  container.innerHTML = '<div style="text-align:center;padding:48px;color:var(--cinza-texto);">Carregando...</div>';
+
+  fetch(`${WORKER_URL}/rascunho/listar?loja=${encodeURIComponent(loja)}`)
+    .then(r => r.json())
+    .then(data => {
+      const lista = data.rascunhos || [];
+      if (lista.length === 0) {
+        container.innerHTML = `<div style="text-align:center;padding:56px 24px;background:var(--branco);border:1px solid var(--cinza-borda);border-radius:12px;">
+          <div style="font-size:48px;margin-bottom:12px;">📂</div>
+          <div style="font-size:15px;font-weight:600;color:var(--texto);margin-bottom:4px;">Nenhum orçamento em aberto</div>
+          <div style="font-size:13px;color:var(--cinza-texto);">Clique em "Realizar Orçamento" para começar.</div>
+        </div>`;
+        return;
+      }
+      container.innerHTML = lista.map(r => `
+        <div style="background:var(--branco);border:1px solid var(--cinza-borda);border-radius:10px;padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:200px;">
+            <div style="font-weight:700;font-size:14px;color:var(--texto);">${r.nome.replace('[RASCUNHO] ','')}</div>
+            <div style="font-size:12px;color:var(--cinza-texto);margin-top:3px;">${r.vendedora || '—'} · Atualizado em ${new Date(r.data).toLocaleString('pt-BR')}</div>
+          </div>
+          <div style="font-weight:800;font-size:17px;color:var(--vermelho);white-space:nowrap;">${formatarMoeda(r.valor)}</div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-primario btn-sm" onclick="editarRascunho('${r.id}','${r.nome.replace(/'/g,"\\'")}')">✏️ Abrir</button>
+            <button class="btn btn-perigo btn-sm" onclick="deletarRascunhoHome('${r.id}', this)">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    })
+    .catch(err => {
+      container.innerHTML = `<div style="padding:24px;color:var(--vermelho);text-align:center;">Erro ao carregar: ${err.message || 'verifique a conexão'}</div>`;
+    });
+}
+
+function deletarRascunhoHome(id, btn) {
+  if (!confirm('Excluir este orçamento definitivamente?')) return;
+  btn.disabled = true; btn.textContent = '...';
+  fetch(`${WORKER_URL}/rascunho/deletar/${id}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' })
+    .then(r => r.json())
+    .then(() => carregarHomeRascunhos())
+    .catch(() => { btn.disabled = false; btn.textContent = '🗑️'; alert('Erro ao deletar.'); });
+}
+
+function iniciarNovoOrcamento() {
+  // Limpa tudo e começa do zero
+  itens = [];
+  rascunhoAtivo = null;
+  ['cnpj','razao-social','cep','endereco','complemento','bairro','cidade','contato-nome','cpf','contato-email','contato-tel','contato-tel2','obs-pedido','info-importante','dados-adicionais'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  ['estado','vendedora-loja','loja-select','condicao-pagamento'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  // Pré-seleciona a loja do login
+  if (sessao && sessao.loja) {
+    const lojaSel = document.getElementById('loja-select');
+    if (lojaSel) {
+      for (const opt of lojaSel.options) {
+        if (opt.value === sessao.loja) { lojaSel.value = sessao.loja; break; }
+      }
+    }
+  }
+  renderizarItens();
+  document.getElementById('steps-bar').style.display = 'flex';
+  document.getElementById('banner-rascunho').classList.remove('visivel');
+  irTela(1);
+}
+
 function irTela(n) {
   document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
 
@@ -1583,7 +1681,7 @@ function exportarOrcamento() {
     .totais { display:flex; justify-content:flex-end; margin-bottom:24px; }
     .totais-box { width:260px; }
     .totais-linha { display:flex; justify-content:space-between; padding:5px 0; font-size:11px; border-bottom:1px solid #eee; }
-    .totais-total { display:flex; justify-content:space-between; padding:10px 0; font-size:15px; font-weight:800; color:#9E0B0F; border-top:2px solid #1a1a1a; margin-top:4px; }
+    .totais-total { display:flex; justify-content:space-between; padding:10px 0; font-size:15px; font-weight:800; color:#1D9E75; border-top:2px solid #1a1a1a; margin-top:4px; }
     .tab-dados { width:100%; border-collapse:collapse; margin-bottom:24px; }
     .tab-dados td { padding:7px 10px; border:1px solid #e5e5e5; font-size:9.5px; }
     .tab-dados td.k { background:#fafafa; font-weight:600; width:30%; color:#555; }
@@ -1777,6 +1875,9 @@ function novoPedido() {
   telaAtual = 1;
   rascunhoAtivo = null;
   document.getElementById('banner-rascunho').classList.remove('visivel');
+  document.getElementById('rodape-acoes').classList.remove('oculto');
+  irHome();
+  return;
   // Limpa formulário
   ['cnpj','razao-social','cep','endereco','complemento','bairro','cidade','contato-nome','cpf','contato-email','contato-tel','contato-tel2','obs-pedido','info-importante'].forEach(id => {
     document.getElementById(id).value = '';
@@ -1971,6 +2072,7 @@ function editarRascunho(id, nome) {
       rascunhoAtivo = { id, nome };
       document.getElementById('banner-rascunho-nome').textContent = nome.replace('[RASCUNHO] ','');
       document.getElementById('banner-rascunho').classList.add('visivel');
+      document.getElementById('steps-bar').style.display = 'flex';
       irTela(1);
     })
     .catch(() => { ocultarLoading(); alert('Erro de conexão.'); });
