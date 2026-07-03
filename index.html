@@ -819,6 +819,29 @@
               </select>
             </div>
           </div>
+
+          <div class="campo" style="margin-top:12px;margin-bottom:0;">
+            <label>Programação / Amostra</label>
+            <select id="bordado-programacao">
+              <option value="">Selecione</option>
+              <option value="precisa">Precisa de Programação e Amostra</option>
+              <option value="amostra_sem_prog">Amostra sem programação</option>
+              <option value="nao_precisa">Não precisa de amostra</option>
+            </select>
+          </div>
+
+          <div class="campo" style="margin-top:12px;margin-bottom:0;">
+            <label>📋 Observação para a Programação (opcional)</label>
+            <input type="text" id="bordado-obs-prog" placeholder="Ex.: Cor exata do logo, fonte específica, alinhamento..."
+              style="width:100%;padding:9px 12px;border:1px solid var(--cinza-borda);border-radius:7px;font-size:13px;font-family:inherit;">
+          </div>
+
+          <div class="campo" style="margin-top:12px;margin-bottom:0;">
+            <label>🧵 Observação para o Bordado (opcional)</label>
+            <input type="text" id="bordado-obs-bord" placeholder="Ex.: Reforço nas bordas, tensão da linha, posição exata..."
+              style="width:100%;padding:9px 12px;border:1px solid var(--cinza-borda);border-radius:7px;font-size:13px;font-family:inherit;">
+          </div>
+
           <div style="margin-top:12px;">
             <label class="field-label" style="font-size:12px;color:var(--cinza-texto);font-weight:600;display:block;margin-bottom:6px;">Arquivo do bordado</label>
             <label for="bordado-arquivo" style="display:inline-flex;align-items:center;gap:8px;background:var(--azul-bg);color:var(--azul);border:1px solid #85B7EB;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
@@ -1250,6 +1273,17 @@ function avancarTela() {
       alert('Adicione pelo menos um produto antes de continuar.');
       return;
     }
+    // Exige resposta "tem bordado?" para cada produto (exceto produtos que já são bordado/silk/DTF)
+    const semResposta = itens.find(it => !it.ehProdutoBordado && it.temBordado === null);
+    if (semResposta) {
+      alert(`Informe se o produto "${semResposta.produto.nome}" tem bordado (Sim ou Não).`);
+      return;
+    }
+    const semTipo = itens.find(it => !it.ehProdutoBordado && it.temBordado === true && !it.bordadoTipo);
+    if (semTipo) {
+      alert(`Selecione o tipo de bordado do produto "${semTipo.produto.nome}".`);
+      return;
+    }
     irTela(3);
   } else if (telaAtual === 3) {
     // Personalização é opcional
@@ -1483,6 +1517,9 @@ function adicionarItem(produto) {
   const grade = {};
   tamanhos.forEach(t => grade[t] = 0);
 
+  // Produtos que já SÃO bordado/silk/DTF não recebem flag (são o item de bordado em si)
+  const ehProdutoBordado = /bordado|silk|dtf/i.test(produto.nome || '');
+
   itens.push({
     id: Date.now(),
     produto,
@@ -1490,6 +1527,9 @@ function adicionarItem(produto) {
     grade,
     obs: '',
     desconto: 0,
+    temBordado: ehProdutoBordado ? false : null,  // null = ainda não respondeu
+    bordadoTipo: '',                                // 'prog' | 'amostra' | 'nenhum'
+    ehProdutoBordado,
     totalPecas: 0,
     valorLiq: 0
   });
@@ -1568,6 +1608,20 @@ function renderizarItens() {
             <div class="liq-val" id="liq-${it.id}">${formatarMoeda(it.valorLiq)}</div>
           </div>
         </div>
+        ${it.ehProdutoBordado ? '' : `
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--cinza-bg);">
+          <div style="font-size:12px;font-weight:700;color:var(--cinza-texto);margin-bottom:8px;">🧵 Produto tem bordado?</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button type="button" class="btn btn-sm ${it.temBordado === true ? 'btn-primario' : 'btn-secundario'}" onclick="setTemBordado(${it.id}, true)">Sim</button>
+            <button type="button" class="btn btn-sm ${it.temBordado === false ? 'btn-primario' : 'btn-secundario'}" onclick="setTemBordado(${it.id}, false)">Não</button>
+            ${it.temBordado === true ? `
+              <span style="margin-left:8px;font-size:11px;color:var(--cinza-texto);">Tipo:</span>
+              <button type="button" class="btn btn-sm ${it.bordadoTipo === 'prog' ? 'btn-primario' : 'btn-secundario'}" onclick="setBordadoTipo(${it.id}, 'prog')">Precisa Programação e Amostra</button>
+              <button type="button" class="btn btn-sm ${it.bordadoTipo === 'amostra' ? 'btn-primario' : 'btn-secundario'}" onclick="setBordadoTipo(${it.id}, 'amostra')">Amostra sem programação</button>
+              <button type="button" class="btn btn-sm ${it.bordadoTipo === 'nenhum' ? 'btn-primario' : 'btn-secundario'}" onclick="setBordadoTipo(${it.id}, 'nenhum')">Não precisa de amostra</button>
+            ` : ''}
+          </div>
+        </div>`}
       </div>
     </div>`;
   }).join('');
@@ -1585,6 +1639,21 @@ function atualizarGrade(id, sz, val) {
   document.getElementById(`total-grade-${id}`).textContent = `${it.totalPecas} pcs`;
   document.getElementById(`liq-${id}`).textContent = formatarMoeda(it.valorLiq);
   atualizarTotais();
+}
+
+function setTemBordado(id, valor) {
+  const it = itens.find(i => i.id === id);
+  if (!it) return;
+  it.temBordado = valor;
+  if (!valor) it.bordadoTipo = '';
+  renderizarItens();
+}
+
+function setBordadoTipo(id, tipo) {
+  const it = itens.find(i => i.id === id);
+  if (!it) return;
+  it.bordadoTipo = tipo;
+  renderizarItens();
 }
 
 function atualizarObs(id, val) {
@@ -1720,15 +1789,20 @@ function renderizarRevisao() {
     ${bordados.length > 0 ? `
     <div class="rev-secao">
       <div class="rev-titulo">Bordados (${bordados.length})</div>
-      ${bordados.map(b => `
+      ${bordados.map(b => {
+        const progLbl = { precisa: 'Precisa de Programação e Amostra', amostra_sem_prog: 'Amostra sem programação', nao_precisa: 'Não precisa de amostra' };
+        return `
         <div class="rev-produto">
           <div class="rev-prod-header">
             <div class="rev-prod-nome">🧵 ${b.positionLabel}</div>
           </div>
           <div class="rev-desc">${b.productName}${b.sku ? ' · '+b.sku : ''}</div>
+          <div class="rev-desc" style="color:var(--verde);">⚙️ ${progLbl[b.programacao] || b.programacao}</div>
+          ${b.obsProgramacao ? `<div class="rev-desc">📋 Programação: ${b.obsProgramacao}</div>` : ''}
+          ${b.obsBordado ? `<div class="rev-desc">🧵 Bordado: ${b.obsBordado}</div>` : ''}
           <div class="rev-desc" style="color:var(--azul);">📄 ${b.fileName}</div>
         </div>
-      `).join('')}
+      `;}).join('')}
     </div>` : ''}
   `;
 }
@@ -1954,8 +2028,13 @@ function adicionarBordado() {
   const prodId   = document.getElementById('bordado-produto').value;
   const posKey   = document.getElementById('bordado-posicao').value;
 
+  const programacao = document.getElementById('bordado-programacao').value;
+  const obsProg     = document.getElementById('bordado-obs-prog').value.trim();
+  const obsBord     = document.getElementById('bordado-obs-bord').value.trim();
+
   if (!prodId)  { alert('Selecione o produto.'); return; }
   if (!posKey)  { alert('Selecione a posição.'); return; }
+  if (!programacao) { alert('Selecione a opção de Programação / Amostra.'); return; }
   if (!arquivoBordadoTemp) { alert('Anexe o arquivo do bordado.'); return; }
 
   const it = itens.find(i => i.produto.id === prodId);
@@ -1968,6 +2047,9 @@ function adicionarBordado() {
     sku:           it.produto.sku || '',
     position:      posKey,
     positionLabel: POSICOES_BORDADO[posKey] || posKey,
+    programacao:   programacao,          // precisa | amostra_sem_prog | nao_precisa
+    obsProgramacao: obsProg,
+    obsBordado:    obsBord,
     fileName:      arquivoBordadoTemp.nome,
     fileBase64:    arquivoBordadoTemp.base64,
     fileTipo:      arquivoBordadoTemp.tipo,
@@ -1976,6 +2058,9 @@ function adicionarBordado() {
   // Reset campos
   document.getElementById('bordado-produto').value = '';
   document.getElementById('bordado-posicao').value = '';
+  document.getElementById('bordado-programacao').value = '';
+  document.getElementById('bordado-obs-prog').value = '';
+  document.getElementById('bordado-obs-bord').value = '';
   document.getElementById('bordado-arquivo').value = '';
   document.getElementById('bordado-arquivo-label').textContent = 'Escolher arquivo';
   arquivoBordadoTemp = null;
@@ -1997,12 +2082,16 @@ function renderizarBordados() {
     container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-texto);font-size:13px;"><span style="font-size:32px;display:block;margin-bottom:6px;">🧵</span>Nenhum bordado adicionado. Esta etapa é opcional.</div>';
     return;
   }
+  const progLabel = { precisa: 'Precisa de Programação e Amostra', amostra_sem_prog: 'Amostra sem programação', nao_precisa: 'Não precisa de amostra' };
   container.innerHTML = bordados.map(b => `
-    <div style="background:var(--branco);border:1px solid var(--cinza-borda);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div style="background:var(--branco);border:1px solid var(--cinza-borda);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
       <span style="font-size:22px;">🧵</span>
       <div style="flex:1;min-width:200px;">
         <div style="font-weight:700;font-size:13px;">${b.positionLabel}</div>
         <div style="font-size:11px;color:var(--cinza-texto);">${b.productName}${b.sku ? ' · '+b.sku : ''}</div>
+        <div style="font-size:11px;color:var(--verde);margin-top:2px;">⚙️ ${progLabel[b.programacao] || b.programacao}</div>
+        ${b.obsProgramacao ? `<div style="font-size:11px;color:var(--cinza-texto);margin-top:2px;">📋 ${b.obsProgramacao}</div>` : ''}
+        ${b.obsBordado ? `<div style="font-size:11px;color:var(--cinza-texto);margin-top:2px;">🧵 ${b.obsBordado}</div>` : ''}
         <div style="font-size:11px;color:var(--azul);margin-top:2px;">📄 ${b.fileName}</div>
       </div>
       <button class="btn btn-perigo btn-sm" onclick="removerBordado('${b.id}')">✕ Remover</button>
@@ -2102,12 +2191,16 @@ function executarEnvio() {
       desconto:      it.desconto || 0,
       valor_liquido: it.valorLiq,
       obs:           it.obs || '',
-      grade:         it.grade
+      grade:         it.grade,
+      tem_bordado:          it.temBordado === true,
+      precisa_programacao:  it.bordadoTipo === 'prog',
+      amostra_sem_prog:     it.bordadoTipo === 'amostra'
     })),
     anexos: anexos,
     bordados: bordados.map(b => ({
       id: b.id, productId: b.productId, productName: b.productName, sku: b.sku,
       position: b.position, positionLabel: b.positionLabel,
+      programacao: b.programacao, obsProgramacao: b.obsProgramacao, obsBordado: b.obsBordado,
       fileName: b.fileName, fileBase64: b.fileBase64, fileTipo: b.fileTipo
     }))
   };
@@ -2272,12 +2365,16 @@ function montarPayload() {
       desconto:      it.desconto || 0,
       valor_liquido: it.valorLiq,
       obs:           it.obs || '',
-      grade:         it.grade
+      grade:         it.grade,
+      tem_bordado:          it.temBordado === true,
+      precisa_programacao:  it.bordadoTipo === 'prog',
+      amostra_sem_prog:     it.bordadoTipo === 'amostra'
     })),
     anexos: anexos,
     bordados: bordados.map(b => ({
       id: b.id, productId: b.productId, productName: b.productName, sku: b.sku,
       position: b.position, positionLabel: b.positionLabel,
+      programacao: b.programacao, obsProgramacao: b.obsProgramacao, obsBordado: b.obsBordado,
       fileName: b.fileName, fileBase64: b.fileBase64, fileTipo: b.fileTipo
     }))
   };
@@ -2418,6 +2515,11 @@ function preencherFormulario(dados) {
     itens = itensData.map(item => {
       const tamanhos = (item.tamanhos_lista || '').split(';').map(t => t.trim()).filter(Boolean);
       if (tamanhos.length === 0 && item.grade) tamanhos.push(...Object.keys(item.grade));
+      const ehProdutoBordado = /bordado|silk|dtf/i.test(item.nome || '');
+      let bordadoTipo = '';
+      if (item.precisa_programacao) bordadoTipo = 'prog';
+      else if (item.amostra_sem_prog) bordadoTipo = 'amostra';
+      else if (item.tem_bordado) bordadoTipo = 'nenhum';
       return {
         id:       Date.now() + Math.random(),
         produto:  { id: item.produto_id, nome: item.nome, sku: item.sku, preco: item.preco, foto: item.foto || null, tamanhos: item.tamanhos_lista || '' },
@@ -2425,6 +2527,9 @@ function preencherFormulario(dados) {
         grade:    item.grade || {},
         obs:      item.obs || '',
         desconto: item.desconto || 0,
+        temBordado: ehProdutoBordado ? false : (item.tem_bordado === true ? true : (item.tem_bordado === false ? false : null)),
+        bordadoTipo: bordadoTipo,
+        ehProdutoBordado,
         totalPecas: item.quantidade || 0,
         valorLiq:   item.valor_liquido || 0
       };
