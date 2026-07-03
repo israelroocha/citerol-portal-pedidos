@@ -2231,6 +2231,10 @@ function executarEnvio() {
     ocultarLoading();
     if (data.ok) {
       rascunhoAtivo = null;
+      // Se houve erro no processamento de bordados, avisa
+      if (data.bordados && data.bordados.erros && data.bordados.erros.length > 0) {
+        alert('⚠️ O pedido foi criado, mas houve problema ao enviar os bordados:\n\n' + data.bordados.erros.join('\n\n') + '\n\nVerifique se o app tem permissão de arquivos (files) no HubSpot.');
+      }
       document.getElementById('confirmacao-deal-nome').textContent = data.deal_nome;
       salvarPedidoHistorico(data.deal_nome, payload.pedido.valor_total, payload.pedido.loja, payload.itens.length);
       irTela(6);
