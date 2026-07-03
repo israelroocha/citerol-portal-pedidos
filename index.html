@@ -496,8 +496,8 @@
     body { background: white; }
     .header, .steps-bar, .rodape-acoes, .btn-exportar, .btn-perigo, .busca-wrap { display: none !important; }
     .tela { display: block !important; padding: 0; }
-    .tela:not(#tela-4) { display: none !important; }
-    #tela-4 { display: block !important; }
+    .tela:not(#tela-5) { display: none !important; }
+    #tela-5 { display: block !important; }
     .secao, .item-card, .rev-produto { break-inside: avoid; }
   }
 </style>
@@ -557,23 +557,28 @@
 
   <!-- Steps -->
   <div class="steps-bar" id="steps-bar">
-    <div class="step ativo" id="step-1">
+    <div class="step ativo" id="step-1" onclick="navegarStep(1)" style="cursor:pointer;">
       <div class="step-num">1</div>
       <span>Cliente</span>
     </div>
     <div class="step-sep" id="sep-1"></div>
-    <div class="step" id="step-2">
+    <div class="step" id="step-2" onclick="navegarStep(2)" style="cursor:pointer;">
       <div class="step-num">2</div>
       <span>Produtos</span>
     </div>
     <div class="step-sep" id="sep-2"></div>
-    <div class="step" id="step-3">
+    <div class="step" id="step-3" onclick="navegarStep(3)" style="cursor:pointer;">
       <div class="step-num">3</div>
-      <span>Pagamento</span>
+      <span>Personalização</span>
     </div>
     <div class="step-sep" id="sep-3"></div>
-    <div class="step" id="step-4">
+    <div class="step" id="step-4" onclick="navegarStep(4)" style="cursor:pointer;">
       <div class="step-num">4</div>
+      <span>Pagamento</span>
+    </div>
+    <div class="step-sep" id="sep-4"></div>
+    <div class="step" id="step-5" onclick="navegarStep(5)" style="cursor:pointer;">
+      <div class="step-num">5</div>
       <span>Revisão</span>
     </div>
   </div>
@@ -784,8 +789,53 @@
   </div>
 
 
-  <!-- ===== TELA 3: PAGAMENTO ===== -->
+  <!-- ===== TELA 3: PERSONALIZAÇÃO (BORDADOS) ===== -->
   <div class="tela" id="tela-3">
+    <div class="secao">
+      <div class="secao-header">
+        <div class="secao-icone">🧵</div>
+        <div class="secao-titulo">Personalização — Bordados</div>
+      </div>
+      <div class="secao-corpo">
+        <p style="font-size:12px;color:var(--cinza-texto);margin-bottom:14px;">Adicione os bordados do pedido. Para cada um, escolha o produto, a posição e anexe o arquivo do bordado. Esta etapa é opcional.</p>
+
+        <div style="background:var(--cinza-bg);border-radius:8px;padding:14px;margin-bottom:14px;">
+          <div class="grid-2" style="gap:10px 14px;">
+            <div class="campo" style="margin-bottom:0;">
+              <label>Produto</label>
+              <select id="bordado-produto">
+                <option value="">Selecione o produto</option>
+              </select>
+            </div>
+            <div class="campo" style="margin-bottom:0;">
+              <label>Posição</label>
+              <select id="bordado-posicao">
+                <option value="">Selecione a posição</option>
+                <option value="peito_direito">Peito Direito</option>
+                <option value="peito_esquerdo">Peito Esquerdo</option>
+                <option value="manga_direita">Manga Direita</option>
+                <option value="manga_esquerda">Manga Esquerda</option>
+                <option value="costas">Costas</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <label class="field-label" style="font-size:12px;color:var(--cinza-texto);font-weight:600;display:block;margin-bottom:6px;">Arquivo do bordado</label>
+            <label for="bordado-arquivo" style="display:inline-flex;align-items:center;gap:8px;background:var(--azul-bg);color:var(--azul);border:1px solid #85B7EB;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+              <span>📎</span> <span id="bordado-arquivo-label">Escolher arquivo</span>
+            </label>
+            <input type="file" id="bordado-arquivo" accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.svg,.cdr,.zip,.psd,.tiff,.tif" style="display:none;" onchange="selecionarArquivoBordado(this.files[0])">
+          </div>
+          <button class="btn btn-primario btn-sm" style="margin-top:14px;" onclick="adicionarBordado()">+ Adicionar Bordado</button>
+        </div>
+
+        <div id="lista-bordados"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TELA 4: PAGAMENTO ===== -->
+  <div class="tela" id="tela-4">
     <div class="secao">
       <div class="secao-header">
         <div class="secao-icone">💳</div>
@@ -838,8 +888,8 @@
     </div>
   </div>
 
-  <!-- ===== TELA 4: REVISÃO ===== -->
-  <div class="tela" id="tela-4">
+  <!-- ===== TELA 5: REVISÃO ===== -->
+  <div class="tela" id="tela-5">
     <div class="secao">
       <div class="secao-header">
         <div class="secao-icone">📋</div>
@@ -851,6 +901,44 @@
         </div>
       </div>
       <div class="secao-corpo" id="revisao-conteudo">
+      </div>
+    </div>
+
+    <div class="secao">
+      <div class="secao-header">
+        <div class="secao-icone">📎</div>
+        <div class="secao-titulo">Anexar Arquivos (opcional)</div>
+      </div>
+      <div class="secao-corpo">
+        <p style="font-size:12px;color:var(--cinza-texto);margin-bottom:10px;">Anexe comprovantes, artes, referências ou outros documentos do pedido.</p>
+        <label for="input-anexos" style="display:inline-flex;align-items:center;gap:8px;background:var(--azul-bg);color:var(--azul);border:1px solid #85B7EB;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+          <span>📎</span> Escolher arquivos
+        </label>
+        <input type="file" id="input-anexos" multiple style="display:none;" onchange="adicionarAnexos(this.files)">
+        <div id="lista-anexos" style="margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Confirmação de Envio -->
+  <div class="modal-overlay" id="modal-confirmar-envio">
+    <div class="modal" style="max-width:460px;">
+      <div class="modal-header">
+        <div class="modal-titulo">⚠️ Confirmar Envio ao Atacado</div>
+        <button class="modal-fechar" onclick="fecharModalConfirmacao()">✕</button>
+      </div>
+      <div class="modal-corpo">
+        <p style="font-size:14px;line-height:1.6;color:var(--texto);margin-bottom:8px;">
+          O pedido só deve ser enviado ao atacado se já estiver <strong>aprovado pelo cliente</strong>.
+        </p>
+        <p style="font-size:13px;line-height:1.6;color:var(--cinza-texto);">
+          Após o envio, o orçamento entra no fluxo de vendas e sai da lista de orçamentos em aberto. Se ainda não estiver aprovado, salve como Orçamento em Aberto para continuar depois.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;">
+          <button class="btn btn-verde btn-lg" onclick="executarEnvio()" style="width:100%;">✅ Confirmar Envio ao Atacado</button>
+          <button class="btn btn-secundario" onclick="salvarComoRascunhoDoModal()" style="width:100%;background:var(--azul-bg);color:var(--azul);border-color:#85B7EB;">💾 Salvar como Orçamento em Aberto</button>
+          <button class="btn btn-secundario" onclick="fecharModalConfirmacao()" style="width:100%;">Cancelar</button>
+        </div>
       </div>
     </div>
   </div>
@@ -935,6 +1023,17 @@ let telaAtual = 1;
 let itens = []; // [{produto, grade:{P:5, M:10...}, desconto:0, total, valorLiq}]
 let buscaTimeout = null;
 let rascunhoAtivo = null; // { id, nome } quando editando rascunho
+let anexos = []; // [{ nome, base64, tipo }]
+let bordados = []; // [{ id, productId, productName, sku, position, positionLabel, fileName, fileBase64, fileTipo }]
+let arquivoBordadoTemp = null; // { nome, base64, tipo } arquivo selecionado antes de adicionar
+
+const POSICOES_BORDADO = {
+  peito_direito:  'Bordado Peito Direito',
+  peito_esquerdo: 'Bordado Peito Esquerdo',
+  manga_direita:  'Bordado Manga Direita',
+  manga_esquerda: 'Bordado Manga Esquerda',
+  costas:         'Bordado Costas',
+};
 
 // ============================================================
 // INICIALIZAÇÃO
@@ -1089,6 +1188,9 @@ function deletarRascunhoHome(id, btn) {
 function iniciarNovoOrcamento() {
   // Limpa tudo e começa do zero
   itens = [];
+  anexos = [];
+  bordados = [];
+  arquivoBordadoTemp = null;
   rascunhoAtivo = null;
   ['cnpj','razao-social','cep','endereco','complemento','bairro','cidade','contato-nome','cpf','contato-email','contato-tel','contato-tel2','obs-pedido','info-importante','dados-adicionais'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
@@ -1106,6 +1208,8 @@ function iniciarNovoOrcamento() {
     }
   }
   renderizarItens();
+  renderizarAnexos();
+  renderizarBordados();
   document.getElementById('steps-bar').style.display = 'flex';
   document.getElementById('banner-rascunho').classList.remove('visivel');
   irTela(1);
@@ -1116,12 +1220,16 @@ function irTela(n) {
 
   if (n === 1) document.getElementById('tela-1').classList.add('ativa');
   else if (n === 2) document.getElementById('tela-2').classList.add('ativa');
-  else if (n === 3) document.getElementById('tela-3').classList.add('ativa');
-  else if (n === 4) {
-    document.getElementById('tela-4').classList.add('ativa');
+  else if (n === 3) {
+    document.getElementById('tela-3').classList.add('ativa');
+    popularProdutosBordado();
+  }
+  else if (n === 4) document.getElementById('tela-4').classList.add('ativa');
+  else if (n === 5) {
+    document.getElementById('tela-5').classList.add('ativa');
     renderizarRevisao();
   }
-  else if (n === 5) {
+  else if (n === 6) {
     document.getElementById('tela-confirmacao').classList.add('ativa');
     document.getElementById('rodape-acoes').classList.add('oculto');
     return;
@@ -1144,10 +1252,13 @@ function avancarTela() {
     }
     irTela(3);
   } else if (telaAtual === 3) {
-    if (!validarTela3()) return;
+    // Personalização é opcional
     irTela(4);
   } else if (telaAtual === 4) {
-    enviarPedido();
+    if (!validarTela4()) return;
+    irTela(5);
+  } else if (telaAtual === 5) {
+    confirmarEnvio();
   }
 }
 
@@ -1155,8 +1266,18 @@ function voltarTela() {
   if (telaAtual > 1) irTela(telaAtual - 1);
 }
 
+// Navegação livre pelos steps (clicando no topo)
+function navegarStep(n) {
+  // Só funciona quando está dentro do fluxo (não na home/confirmação)
+  if (telaAtual < 1 || telaAtual > 5) return;
+  if (n === telaAtual) return;
+  // Ao sair da tela 1 exige validação básica só se avançar
+  if (n > telaAtual && telaAtual === 1 && !validarTela1()) return;
+  irTela(n);
+}
+
 function atualizarSteps() {
-  for (let i = 1; i <= 4; i++) {
+  for (let i = 1; i <= 5; i++) {
     const el = document.getElementById(`step-${i}`);
     if (!el) continue;
     el.classList.remove('ativo', 'concluido');
@@ -1183,27 +1304,30 @@ function atualizarRodape() {
   if (btnSalvarEx) btnSalvarEx.remove();
 
   if (telaAtual === 1) {
-    btnAvancar.textContent = 'Próximo →';
+    btnAvancar.textContent = 'Próximo: Produtos →';
     btnAvancar.className = 'btn btn-primario';
     info.textContent = '';
   } else if (telaAtual === 2) {
-    btnAvancar.textContent = 'Próximo: Pagamento →';
+    btnAvancar.textContent = 'Próximo: Personalização →';
     btnAvancar.className = 'btn btn-primario';
     info.textContent = itens.length > 0 ? `${itens.length} produto(s)` : '';
   } else if (telaAtual === 3) {
+    btnAvancar.textContent = 'Próximo: Pagamento →';
+    btnAvancar.className = 'btn btn-primario';
+    info.textContent = bordados.length > 0 ? `${bordados.length} bordado(s)` : 'Etapa opcional';
+  } else if (telaAtual === 4) {
     btnAvancar.textContent = 'Revisar →';
     btnAvancar.className = 'btn btn-primario';
     info.textContent = '';
-  } else if (telaAtual === 4) {
+  } else if (telaAtual === 5) {
     btnAvancar.textContent = '✅ Enviar para o Atacado';
     btnAvancar.className = 'btn btn-verde btn-lg';
     info.textContent = `${itens.length} produto(s) — ${formatarMoeda(calcularTotal())}`;
-    // Cria botão Salvar Rascunho ao lado do Enviar
     const btnSalvar = document.createElement('button');
     btnSalvar.id = 'btn-salvar-rascunho';
     btnSalvar.className = 'btn btn-secundario';
     btnSalvar.style.cssText = 'background:var(--azul-bg);color:var(--azul);border-color:#85B7EB;';
-    btnSalvar.textContent = '💾 Salvar Rascunho';
+    btnSalvar.textContent = '💾 Salvar Orçamento';
     btnSalvar.onclick = salvarRascunhoPortal;
     btnAvancar.parentNode.insertBefore(btnSalvar, btnAvancar);
   }
@@ -1212,7 +1336,7 @@ function atualizarRodape() {
 // ============================================================
 // VALIDAÇÃO TELA 1
 // ============================================================
-function validarTela3() {
+function validarTela4() {
   const sel = document.getElementById('condicao-pagamento');
   const campo = sel.closest('.campo');
   if (!sel.value) {
@@ -1593,6 +1717,19 @@ function renderizarRevisao() {
         <span style="font-size:22px; font-weight:800; color:var(--vermelho);">${formatarMoeda(calcularTotal())}</span>
       </div>
     </div>
+    ${bordados.length > 0 ? `
+    <div class="rev-secao">
+      <div class="rev-titulo">Bordados (${bordados.length})</div>
+      ${bordados.map(b => `
+        <div class="rev-produto">
+          <div class="rev-prod-header">
+            <div class="rev-prod-nome">🧵 ${b.positionLabel}</div>
+          </div>
+          <div class="rev-desc">${b.productName}${b.sku ? ' · '+b.sku : ''}</div>
+          <div class="rev-desc" style="color:var(--azul);">📄 ${b.fileName}</div>
+        </div>
+      `).join('')}
+    </div>` : ''}
   `;
 }
 
@@ -1783,7 +1920,148 @@ function exportarOrcamento() {
 // ============================================================
 // ENVIAR PEDIDO
 // ============================================================
-function enviarPedido() {
+// ============================================================
+// BORDADOS (PERSONALIZAÇÃO)
+// ============================================================
+function popularProdutosBordado() {
+  const sel = document.getElementById('bordado-produto');
+  const atual = sel.value;
+  sel.innerHTML = '<option value="">Selecione o produto</option>';
+  itens.forEach(it => {
+    const op = document.createElement('option');
+    op.value = it.produto.id;
+    op.textContent = `${it.produto.nome}${it.produto.sku ? ' ('+it.produto.sku+')' : ''}`;
+    sel.appendChild(op);
+  });
+  if (atual) sel.value = atual;
+}
+
+function selecionarArquivoBordado(file) {
+  if (!file) return;
+  if (file.size > 30 * 1024 * 1024) {
+    alert(`Arquivo muito grande: ${(file.size/1024/1024).toFixed(1)} MB. Máximo: 30 MB.`);
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    arquivoBordadoTemp = { nome: file.name, base64: e.target.result.split(',')[1], tipo: file.type };
+    document.getElementById('bordado-arquivo-label').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+function adicionarBordado() {
+  const prodId   = document.getElementById('bordado-produto').value;
+  const posKey   = document.getElementById('bordado-posicao').value;
+
+  if (!prodId)  { alert('Selecione o produto.'); return; }
+  if (!posKey)  { alert('Selecione a posição.'); return; }
+  if (!arquivoBordadoTemp) { alert('Anexe o arquivo do bordado.'); return; }
+
+  const it = itens.find(i => i.produto.id === prodId);
+  if (!it) { alert('Produto não encontrado.'); return; }
+
+  bordados.push({
+    id: 'brd_' + Date.now(),
+    productId:     it.produto.id,
+    productName:   it.produto.nome,
+    sku:           it.produto.sku || '',
+    position:      posKey,
+    positionLabel: POSICOES_BORDADO[posKey] || posKey,
+    fileName:      arquivoBordadoTemp.nome,
+    fileBase64:    arquivoBordadoTemp.base64,
+    fileTipo:      arquivoBordadoTemp.tipo,
+  });
+
+  // Reset campos
+  document.getElementById('bordado-produto').value = '';
+  document.getElementById('bordado-posicao').value = '';
+  document.getElementById('bordado-arquivo').value = '';
+  document.getElementById('bordado-arquivo-label').textContent = 'Escolher arquivo';
+  arquivoBordadoTemp = null;
+
+  renderizarBordados();
+  atualizarRodape();
+}
+
+function removerBordado(id) {
+  bordados = bordados.filter(b => b.id !== id);
+  renderizarBordados();
+  atualizarRodape();
+}
+
+function renderizarBordados() {
+  const container = document.getElementById('lista-bordados');
+  if (!container) return;
+  if (bordados.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--cinza-texto);font-size:13px;"><span style="font-size:32px;display:block;margin-bottom:6px;">🧵</span>Nenhum bordado adicionado. Esta etapa é opcional.</div>';
+    return;
+  }
+  container.innerHTML = bordados.map(b => `
+    <div style="background:var(--branco);border:1px solid var(--cinza-borda);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span style="font-size:22px;">🧵</span>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-weight:700;font-size:13px;">${b.positionLabel}</div>
+        <div style="font-size:11px;color:var(--cinza-texto);">${b.productName}${b.sku ? ' · '+b.sku : ''}</div>
+        <div style="font-size:11px;color:var(--azul);margin-top:2px;">📄 ${b.fileName}</div>
+      </div>
+      <button class="btn btn-perigo btn-sm" onclick="removerBordado('${b.id}')">✕ Remover</button>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// ANEXOS
+// ============================================================
+function adicionarAnexos(fileList) {
+  const arquivos = Array.from(fileList);
+  arquivos.forEach(file => {
+    if (file.size > 10 * 1024 * 1024) {
+      alert(`O arquivo "${file.name}" excede 10MB e não pode ser anexado.`);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      anexos.push({ nome: file.name, base64: e.target.result.split(',')[1], tipo: file.type });
+      renderizarAnexos();
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('input-anexos').value = '';
+}
+
+function removerAnexo(idx) {
+  anexos.splice(idx, 1);
+  renderizarAnexos();
+}
+
+function renderizarAnexos() {
+  const container = document.getElementById('lista-anexos');
+  if (anexos.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = anexos.map((a, i) => `
+    <div style="display:flex;align-items:center;gap:10px;background:var(--cinza-bg);border-radius:7px;padding:8px 12px;margin-bottom:6px;">
+      <span style="font-size:16px;">📄</span>
+      <span style="flex:1;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.nome}</span>
+      <button class="btn btn-perigo btn-sm" onclick="removerAnexo(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function confirmarEnvio() {
+  document.getElementById('modal-confirmar-envio').classList.add('visivel');
+}
+
+function fecharModalConfirmacao() {
+  document.getElementById('modal-confirmar-envio').classList.remove('visivel');
+}
+
+function salvarComoRascunhoDoModal() {
+  fecharModalConfirmacao();
+  salvarRascunhoPortal();
+}
+
+function executarEnvio() {
+  fecharModalConfirmacao();
   mostrarLoading('Criando pedido no HubSpot...');
 
   const payload = {
@@ -1825,6 +2103,12 @@ function enviarPedido() {
       valor_liquido: it.valorLiq,
       obs:           it.obs || '',
       grade:         it.grade
+    })),
+    anexos: anexos,
+    bordados: bordados.map(b => ({
+      id: b.id, productId: b.productId, productName: b.productName, sku: b.sku,
+      position: b.position, positionLabel: b.positionLabel,
+      fileName: b.fileName, fileBase64: b.fileBase64, fileTipo: b.fileTipo
     }))
   };
 
@@ -1834,7 +2118,7 @@ function enviarPedido() {
       ocultarLoading();
       const nomeDeal = `${payload.empresa.razao_social} - Pedido Loja ${payload.pedido.loja} [DEMO]`;
       document.getElementById('confirmacao-deal-nome').textContent = nomeDeal;
-      irTela(5);
+      irTela(6);
     }, 1200);
     return;
   }
@@ -1856,7 +2140,7 @@ function enviarPedido() {
       rascunhoAtivo = null;
       document.getElementById('confirmacao-deal-nome').textContent = data.deal_nome;
       salvarPedidoHistorico(data.deal_nome, payload.pedido.valor_total, payload.pedido.loja, payload.itens.length);
-      irTela(5);
+      irTela(6);
     } else {
       alert('Erro ao criar pedido: ' + (data.erro || 'erro desconhecido'));
     }
@@ -1989,6 +2273,12 @@ function montarPayload() {
       valor_liquido: it.valorLiq,
       obs:           it.obs || '',
       grade:         it.grade
+    })),
+    anexos: anexos,
+    bordados: bordados.map(b => ({
+      id: b.id, productId: b.productId, productName: b.productName, sku: b.sku,
+      position: b.position, positionLabel: b.positionLabel,
+      fileName: b.fileName, fileBase64: b.fileBase64, fileTipo: b.fileTipo
     }))
   };
 }
