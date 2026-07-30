@@ -909,6 +909,37 @@
         </div>
       </div>
     </div>
+
+    <div class="secao">
+      <div class="secao-header">
+        <div class="secao-icone">🚚</div>
+        <div class="secao-titulo">Frete</div>
+      </div>
+      <div class="secao-corpo">
+        <div class="grid-2">
+          <div class="campo">
+            <label>Transportadora</label>
+            <select id="transportadora">
+              <option value="">Selecione a transportadora</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Pagador do Frete</label>
+            <select id="pagador-frete">
+              <option value="">Selecione</option>
+              <option value="Citerol">Citerol</option>
+              <option value="Cliente">Cliente</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Valor do Frete (R$)</label>
+            <input type="number" id="valor-frete" min="0" step="0.01" placeholder="0,00"
+              oninput="atualizarTotais()">
+            <div class="hint">Este valor é somado ao total do orçamento</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ===== TELA 5: REVISÃO ===== -->
@@ -1038,6 +1069,8 @@ const PRODUTOS_DEMO = [
 // ============================================================
 const LOJAS = ["BETIM","GAMELEIRA","IPATINGA","JUIZ DE FORA","CONTAGEM","MONTES CLAROS","PLANALTO","PRADO","PRADO 2","SANTA EFIGENIA","UBERABA","UBERLANDIA","V2","V5","V6"];
 
+const TRANSPORTADORAS = ["CITEROL", "FOB - DESTINATÁRIO", "Frete Grátis - Acima de R$2.500,00", "Frete Grátis - Acima de R$7.000,00", "Frete Orica", "JAMEF TRANSPORTES LTDA", "LOGGI EXPRESS", "MANDAÊ ECONÔMICO", "MANDAÊ RÁPIDO", "PAC", "PATRUS TRANSPORTES", "R$ 80 - Pedidos aé R$ 2.499,99 (Todas as regiões do Brasil)", "R$ 50 - Pedido até R$ 2.499,99 (Região de BH)", "Retirar loja Juiz de Fora", "Retirar na Loja Amazonas", "Retirar na Loja Betim", "Retirar na Loja Contagem", "Retirar na Loja Ipatinga", "Retirar na Loja Montes Claros", "Retirar na Loja Planalto", "Retirar na Loja Prado", "Retirar na Loja Santa Efigênia", "Retirar na Loja Uberaba", "Retirar na Loja Uberlândia", "SEDEX", "SEDEX XP", "Marketplace Envios", "PAC CORREIOS", "Retirar Loja: Av. Amazonas (BH)", "Retirar Loja: Contagem - MG", "Retirar loja: Planalto (BELO HORIZONTE - MG)", "Retirar Loja: Prado (BELO HORIZONTE - MG)", "Retirar Loja: Santa Efigênia (BELO HORIZONTE - MG)", "SEDEX CORREIOS", "Transportadora Patrus", "BRASPRESS"];
+
 const VENDEDORAS = ["Adiele Stefanie","Adriana Dos Santos","Adriane Stellet","Alexia Marcela De Jesus","Alicia Fernanda","Aline Matias","Aline Vieira","Amanda Roberta","Ana Beatriz","Ana Clara Alves","Ana Clara Farias","Ana Paula Dos Santos","Andreia Geralda","Andressa Sabrina","Antonio Diogo","Ariana Antonia","Ariana Estefani Santos","Aruana Pacheco","Aylla Kamile","Barbara Wanny","Bianca Gomes","Bruna Dos Santos","Bruna Fernandes","Bruna Martins","Bruno Pereira","Caroline Ferreira","Celeste Rodrigues","Cristelle Carolline","Cynthia Celina","Daiane Aparecida","Dayse Thamara","Débora Monik","Ediene Valentim","Edineia Ribeiro","Elisangela Dos Santos","Elisangela Rute","Fernanda De Barros","Flávia Alessandra","Gessica Fernandes","Ingrid Fernandes Ferreira","Isabela Cristina","Isabela Da Silveira","Isabela Silva","Jaqueline Waleska","Jeruza Guedes","Josiane Costa","Joyce Mendes","Karen Cristina Soares","Keiciane Pereira","Kelly Cardoso","Kelly Priscila","Kenia Cristina","Kleydillane Paulo","Lara Alice","Lara Cristina","Laryssa Rodrigues","Leticia Grazielle","Leydiane Stefani Silva","Lilia Pedro","Lorraine Aparecida","Luana Vanessa","Marcus Vinicyus","Maria Eduarda Da Silva","Maria Eduarda Dias","Maria Eduarda Oliveira","Maria Julia","Mariana Eduarda","Mariana Ribeiro","Marliane Eugenia","Michelle Gonçalves","Michelle Rodrigues","Natália Helena","Nayara Vieira","Pamela Vitoria","Renata Cristina","Silvia Prado","Sulhyan Barbosa","Talita Emanuelle","Thamirys Pimentel","Vanielle Claudiorrane","Venda Futura","Vinicius Thadeu","Vitor Dos Santos","Viviane Sousa","Walleska Alexia","Wemerson Max","Yasmim Cristine"];
 
 // Estado da sessão
@@ -1075,6 +1108,14 @@ document.addEventListener('DOMContentLoaded', () => {
     op.value = l; op.textContent = l;
     selLoja.appendChild(op);
   });
+  const selTransp = document.getElementById('transportadora');
+  if (selTransp) {
+    TRANSPORTADORAS.forEach(t => {
+      const op = document.createElement('option');
+      op.value = t; op.textContent = t;
+      selTransp.appendChild(op);
+    });
+  }
 
   // Enter no login
   document.getElementById('login-senha').addEventListener('keydown', e => {
@@ -1215,10 +1256,10 @@ function iniciarNovoOrcamento() {
   bordados = [];
   arquivoBordadoTemp = null;
   rascunhoAtivo = null;
-  ['cnpj','razao-social','cep','endereco','complemento','bairro','cidade','contato-nome','cpf','contato-email','contato-tel','contato-tel2','obs-pedido','info-importante','dados-adicionais'].forEach(id => {
+  ['cnpj','razao-social','cep','endereco','complemento','bairro','cidade','contato-nome','cpf','contato-email','contato-tel','contato-tel2','obs-pedido','info-importante','dados-adicionais','valor-frete'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
-  ['estado','vendedora-loja','loja-select','condicao-pagamento'].forEach(id => {
+  ['estado','vendedora-loja','loja-select','condicao-pagamento','transportadora','pagador-frete'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   // Pré-seleciona a loja do login
@@ -1695,7 +1736,16 @@ function atualizarTotais() {
 }
 
 function calcularTotal() {
+  return calcularSubtotal() + calcularFrete();
+}
+
+function calcularSubtotal() {
   return itens.reduce((a, it) => a + it.valorLiq, 0);
+}
+
+function calcularFrete() {
+  const el = document.getElementById('valor-frete');
+  return el ? (parseFloat(el.value) || 0) : 0;
 }
 
 // Tecla Tab/Enter navega entre células da grade
@@ -1774,16 +1824,29 @@ function renderizarRevisao() {
       ${info ? `<div class="rev-linha"><span class="rev-chave">Info. importante</span><span class="rev-val" style="max-width:60%;text-align:right;">${info}</span></div>` : ''}
     </div>
     <div class="rev-secao">
-      <div class="rev-titulo">Pagamento</div>
+      <div class="rev-titulo">Pagamento e Frete</div>
       <div class="rev-linha"><span class="rev-chave">Condição</span><span class="rev-val">${document.getElementById('condicao-pagamento').value}</span></div>
       ${document.getElementById('dados-adicionais').value ? `<div class="rev-linha"><span class="rev-chave">Inf. adicionais</span><span class="rev-val" style="max-width:60%;text-align:right;">${document.getElementById('dados-adicionais').value}</span></div>` : ''}
+      ${document.getElementById('transportadora').value ? `<div class="rev-linha"><span class="rev-chave">Transportadora</span><span class="rev-val" style="max-width:60%;text-align:right;">${document.getElementById('transportadora').value}</span></div>` : ''}
+      ${document.getElementById('pagador-frete').value ? `<div class="rev-linha"><span class="rev-chave">Pagador do frete</span><span class="rev-val">${document.getElementById('pagador-frete').value}</span></div>` : ''}
+      ${calcularFrete() > 0 ? `<div class="rev-linha"><span class="rev-chave">Valor do frete</span><span class="rev-val">${formatarMoeda(calcularFrete())}</span></div>` : ''}
     </div>
     <div class="rev-secao">
       <div class="rev-titulo">Produtos (${itens.length})</div>
       ${produtos}
-      <div style="margin-top:14px; padding:14px; background:var(--vermelho-claro); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-weight:700; color:var(--vermelho);">Total do Orçamento</span>
-        <span style="font-size:22px; font-weight:800; color:var(--vermelho);">${formatarMoeda(calcularTotal())}</span>
+      <div style="margin-top:14px; padding:14px; background:var(--vermelho-claro); border-radius:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--cinza-texto); margin-bottom:6px;">
+          <span>Subtotal produtos</span>
+          <span>${formatarMoeda(calcularSubtotal())}</span>
+        </div>
+        ${calcularFrete() > 0 ? `<div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--cinza-texto); margin-bottom:6px;">
+          <span>Frete</span>
+          <span>${formatarMoeda(calcularFrete())}</span>
+        </div>` : ''}
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid var(--vermelho-borda);">
+          <span style="font-weight:700; color:var(--vermelho);">Total do Orçamento</span>
+          <span style="font-size:22px; font-weight:800; color:var(--vermelho);">${formatarMoeda(calcularTotal())}</span>
+        </div>
       </div>
     </div>
     ${bordados.length > 0 ? `
@@ -1833,6 +1896,9 @@ function exportarOrcamento() {
   const dadosAdic = g('dados-adicionais');
   const obs       = g('obs-pedido');
   const infoImp   = g('info-importante');
+  const transportadora = g('transportadora');
+  const pagadorFrete   = g('pagador-frete');
+  const valorFrete     = calcularFrete();
 
   const endCompleto = [end, comp, bairro, cidade, estado].filter(Boolean).join(', ') + (cep ? ' CEP: ' + cep : '');
   const dataEmissao = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
@@ -1953,6 +2019,8 @@ function exportarOrcamento() {
     <div class="totais">
       <div class="totais-box">
         <div class="totais-linha"><span>Total de peças</span><span>${itens.reduce((a,it)=>a+it.totalPecas,0)}</span></div>
+        <div class="totais-linha"><span>Subtotal produtos</span><span>${formatarMoeda(calcularSubtotal())}</span></div>
+        ${valorFrete > 0 ? `<div class="totais-linha"><span>Frete</span><span>${formatarMoeda(valorFrete)}</span></div>` : ''}
         <div class="totais-total"><span>Total</span><span>${formatarMoeda(calcularTotal())}</span></div>
       </div>
     </div>
@@ -1962,6 +2030,9 @@ function exportarOrcamento() {
       <tr><td class="k">Condições de pagamento</td><td>${pagamento || '—'}</td></tr>
       <tr><td class="k">Centro de custo</td><td>27 - Corporativo</td></tr>
       <tr><td class="k">Loja</td><td>${loja || '—'}</td></tr>
+      <tr><td class="k">Transportadora</td><td>${transportadora || '—'}</td></tr>
+      <tr><td class="k">Pagador do frete</td><td>${pagadorFrete || '—'}</td></tr>
+      <tr><td class="k">Valor do frete</td><td>${valorFrete > 0 ? formatarMoeda(valorFrete) : 'R$ 0,00'}</td></tr>
       ${obs ? `<tr><td class="k">Observações</td><td>${obs}</td></tr>` : ''}
       ${infoImp ? `<tr><td class="k">Informação importante</td><td>${infoImp}</td></tr>` : ''}
       <tr><td class="k">Dados adicionais</td><td>${dadosAdic || '—'}</td></tr>
@@ -2178,6 +2249,9 @@ function executarEnvio() {
       info_importante: document.getElementById('info-importante').value,
       condicao_de_pagamento: document.getElementById('condicao-pagamento').value,
       dados_adicionais: document.getElementById('dados-adicionais').value,
+      transportadora: document.getElementById('transportadora').value,
+      pagador_frete: document.getElementById('pagador-frete').value,
+      valor_frete: calcularFrete(),
       valor_total: calcularTotal(),
     },
     itens: itens.map(it => ({
@@ -2356,6 +2430,9 @@ function montarPayload() {
       info_importante:      document.getElementById('info-importante').value,
       condicao_de_pagamento:document.getElementById('condicao-pagamento').value,
       dados_adicionais:     document.getElementById('dados-adicionais').value,
+      transportadora:       document.getElementById('transportadora').value,
+      pagador_frete:        document.getElementById('pagador-frete').value,
+      valor_frete:          calcularFrete(),
       valor_total:          calcularTotal(),
     },
     itens: itens.map(it => ({
@@ -2507,7 +2584,8 @@ function preencherFormulario(dados) {
   if (pedido) {
     const mapP = {'vendedora-loja':'vendedora_da_loja','loja-select':'loja',
       'obs-pedido':'obs','info-importante':'info_importante',
-      'condicao-pagamento':'condicao_de_pagamento','dados-adicionais':'dados_adicionais'};
+      'condicao-pagamento':'condicao_de_pagamento','dados-adicionais':'dados_adicionais',
+      'transportadora':'transportadora','pagador-frete':'pagador_frete','valor-frete':'valor_frete'};
     Object.entries(mapP).forEach(([id, key]) => {
       const el = document.getElementById(id);
       if (el && pedido[key] !== undefined) el.value = pedido[key] || '';
