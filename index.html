@@ -1129,6 +1129,7 @@
 // CONFIGURAÇÃO — edite aqui
 // ============================================================
 const WORKER_URL = 'https://citerol-portal-loja.israel-caetano-lima.workers.dev';
+const FRETE_WORKER_URL = 'https://citerol-frete-manager.israel-caetano-lima.workers.dev';
 
 // ============================================================
 // MODO DEMONSTRAÇÃO — para testar sem o Worker
@@ -1915,7 +1916,7 @@ function cotarFrete() {
     .map(it => ({ sku: it.produto.sku, quantidade: it.totalPecas, preco: precoItem(it) }))
     .filter(it => it.sku && it.quantidade > 0);
 
-  fetch(`${WORKER_URL}/frete/cotar`, {
+  fetch(`${FRETE_WORKER_URL}/cotar-itens`, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ cepDestino: cep, itens: itensCotacao })
