@@ -915,6 +915,25 @@
           <textarea id="dados-adicionais" placeholder="Dados de pagamento, comprovantes, observações gerais do pedido..." style="min-height:100px;"></textarea>
           <div class="hint">Este campo vai para "Dados Adicionais" no HubSpot</div>
         </div>
+        <div class="grid-2" style="margin-top:8px;">
+          <div class="campo">
+            <label>Natureza da Operação</label>
+            <select id="natureza">
+              <option value="">Selecione a natureza</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Tipo</label>
+            <select id="tipo">
+              <option value="">Selecione o tipo</option>
+            </select>
+          </div>
+          <div class="campo col-span-2">
+            <label>E-mail da Nota Fiscal Eletrônica</label>
+            <input type="email" id="email-nfe" placeholder="email@empresa.com.br">
+            <div class="hint">Para envio da NF-e ao cliente</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -924,6 +943,20 @@
         <div class="secao-titulo">Frete</div>
       </div>
       <div class="secao-corpo">
+        <!-- Cotação automática Frete Rápido -->
+        <div style="background:var(--cinza-bg);border-radius:8px;padding:14px;margin-bottom:16px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:10px;">📦 Cotar frete automaticamente</div>
+          <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+            <div class="campo" style="margin-bottom:0;flex:1;min-width:160px;">
+              <label>CEP de destino</label>
+              <input type="text" id="frete-cep" placeholder="00000-000" maxlength="9" oninput="mascaraCEP(this)">
+            </div>
+            <button class="btn btn-primario" onclick="cotarFrete()" id="btn-cotar-frete">Cotar frete</button>
+          </div>
+          <div id="frete-cot-status" style="font-size:12px;color:var(--cinza-texto);margin-top:8px;"></div>
+          <div id="frete-ofertas" style="margin-top:12px;"></div>
+        </div>
+
         <div class="grid-2">
           <div class="campo">
             <label>Transportadora</label>
@@ -1077,6 +1110,9 @@ const PRODUTOS_DEMO = [
 // ============================================================
 const LOJAS = ["BETIM","GAMELEIRA","IPATINGA","JUIZ DE FORA","CONTAGEM","MONTES CLAROS","PLANALTO","PRADO","PRADO 2","SANTA EFIGENIA","UBERABA","UBERLANDIA","V2","V5","V6"];
 
+const NATUREZAS = ["100.01 - Venda De Mercadoria", "100.02 - Venda De Ativo Imobilizado", "100.03 - Venda E-Comerce", "100.05 - Venda E-Comerce Cartão", "100.04 - Venda Presencial E-Commerce", "100.06 - Venda De Mercadoria Cartão", "100.09 - Venda De Mercadoria Multiform", "100.10 - Venda Nfc-E", "100.11 - Venda Mercadoria A Não Contrib", "100.12 - Complementar De Preço", "101.01 - Venda De Servico De Industrializacao", "102.01 - Venda De Servico", "105.01 - Venda Efetuada Fora Do Estabelecimento", "108.01 - Venda - Fat Com Entrega Futura", "109.01 - Venda C/Entrega À Ordem", "111.01 - Ind. Efet. P/ Outra Empresa", "120.01 - Transferencia De Mercadorias", "128.01 - Remessa P/Bonificação/Doação/Brinde", "130.01 - Remessa De Material P/ Industrializacao", "131.01 - Remessa De Amostra Gratis", "133.01 - Remessa P/ Demonstracao", "134.01 - Remessa Para Conserto Ou Reparo", "150.01 - Devolução De Compra Para Comercialização", "199.02 - Outras Saidas", "199.06 - Simples Remessa"];
+const TIPOS = ["CHEVROLET", "CJDR", "COMERCIAL DIRETORIA", "DISTRIBUICAO", "FIAT", "JEEP", "JEEP RAM", "LEAPMOTOR", "LICITAÇÃO", "MULTIFORM", "OUTRAS CONCESSIONARIAS", "PADRAO", "PCP - PRODUÇÃO", "PROJETO R", "RAM", "REMESSA E RETORNO", "VAREJO", "VOLKSWAGEN"];
+
 const TRANSPORTADORAS = ["CITEROL", "FOB - DESTINATÁRIO", "Frete Grátis - Acima de R$2.500,00", "Frete Grátis - Acima de R$7.000,00", "Frete Orica", "JAMEF TRANSPORTES LTDA", "LOGGI EXPRESS", "MANDAÊ ECONÔMICO", "MANDAÊ RÁPIDO", "PAC", "PATRUS TRANSPORTES", "R$ 80 - Pedidos aé R$ 2.499,99 (Todas as regiões do Brasil)", "R$ 50 - Pedido até R$ 2.499,99 (Região de BH)", "Retirar loja Juiz de Fora", "Retirar na Loja Amazonas", "Retirar na Loja Betim", "Retirar na Loja Contagem", "Retirar na Loja Ipatinga", "Retirar na Loja Montes Claros", "Retirar na Loja Planalto", "Retirar na Loja Prado", "Retirar na Loja Santa Efigênia", "Retirar na Loja Uberaba", "Retirar na Loja Uberlândia", "SEDEX", "SEDEX XP", "Marketplace Envios", "PAC CORREIOS", "Retirar Loja: Av. Amazonas (BH)", "Retirar Loja: Contagem - MG", "Retirar loja: Planalto (BELO HORIZONTE - MG)", "Retirar Loja: Prado (BELO HORIZONTE - MG)", "Retirar Loja: Santa Efigênia (BELO HORIZONTE - MG)", "SEDEX CORREIOS", "Transportadora Patrus", "BRASPRESS"];
 
 const VENDEDORAS = ["Adiele Stefanie","Adriana Dos Santos","Adriane Stellet","Alexia Marcela De Jesus","Alicia Fernanda","Aline Matias","Aline Vieira","Amanda Roberta","Ana Beatriz","Ana Clara Alves","Ana Clara Farias","Ana Paula Dos Santos","Andreia Geralda","Andressa Sabrina","Antonio Diogo","Ariana Antonia","Ariana Estefani Santos","Aruana Pacheco","Aylla Kamile","Barbara Wanny","Bianca Gomes","Bruna Dos Santos","Bruna Fernandes","Bruna Martins","Bruno Pereira","Caroline Ferreira","Celeste Rodrigues","Cristelle Carolline","Cynthia Celina","Daiane Aparecida","Dayse Thamara","Débora Monik","Ediene Valentim","Edineia Ribeiro","Elisangela Dos Santos","Elisangela Rute","Fernanda De Barros","Flávia Alessandra","Gessica Fernandes","Ingrid Fernandes Ferreira","Isabela Cristina","Isabela Da Silveira","Isabela Silva","Jaqueline Waleska","Jeruza Guedes","Josiane Costa","Joyce Mendes","Karen Cristina Soares","Keiciane Pereira","Kelly Cardoso","Kelly Priscila","Kenia Cristina","Kleydillane Paulo","Lara Alice","Lara Cristina","Laryssa Rodrigues","Leticia Grazielle","Leydiane Stefani Silva","Lilia Pedro","Lorraine Aparecida","Luana Vanessa","Marcus Vinicyus","Maria Eduarda Da Silva","Maria Eduarda Dias","Maria Eduarda Oliveira","Maria Julia","Mariana Eduarda","Mariana Ribeiro","Marliane Eugenia","Michelle Gonçalves","Michelle Rodrigues","Natália Helena","Nayara Vieira","Pamela Vitoria","Renata Cristina","Silvia Prado","Sulhyan Barbosa","Talita Emanuelle","Thamirys Pimentel","Vanielle Claudiorrane","Venda Futura","Vinicius Thadeu","Vitor Dos Santos","Viviane Sousa","Walleska Alexia","Wemerson Max","Yasmim Cristine"];
@@ -1122,6 +1158,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const op = document.createElement('option');
       op.value = t; op.textContent = t;
       selTransp.appendChild(op);
+    });
+  }
+  const selNat = document.getElementById('natureza');
+  if (selNat) {
+    NATUREZAS.forEach(n => {
+      const op = document.createElement('option');
+      op.value = n; op.textContent = n;
+      selNat.appendChild(op);
+    });
+  }
+  const selTipo = document.getElementById('tipo');
+  if (selTipo) {
+    TIPOS.forEach(t => {
+      const op = document.createElement('option');
+      op.value = t; op.textContent = t;
+      selTipo.appendChild(op);
     });
   }
 
@@ -1264,10 +1316,10 @@ function iniciarNovoOrcamento() {
   bordados = [];
   arquivoBordadoTemp = null;
   rascunhoAtivo = null;
-  ['cnpj','razao-social','cep','endereco','complemento','bairro','cidade','contato-nome','cpf','contato-email','contato-tel','contato-tel2','obs-pedido','info-importante','dados-adicionais','valor-frete'].forEach(id => {
+  ['cnpj','razao-social','cep','endereco','complemento','bairro','cidade','contato-nome','cpf','contato-email','contato-tel','contato-tel2','obs-pedido','info-importante','dados-adicionais','valor-frete','email-nfe','frete-cep'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
-  ['estado','vendedora-loja','loja-select','condicao-pagamento','transportadora','pagador-frete'].forEach(id => {
+  ['estado','vendedora-loja','loja-select','condicao-pagamento','transportadora','pagador-frete','natureza','tipo'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   // Pré-seleciona a loja do login
@@ -1296,7 +1348,13 @@ function irTela(n) {
     document.getElementById('tela-3').classList.add('ativa');
     popularProdutosBordado();
   }
-  else if (n === 4) document.getElementById('tela-4').classList.add('ativa');
+  else if (n === 4) {
+    document.getElementById('tela-4').classList.add('ativa');
+    // Pré-preenche o CEP de destino com o CEP do cliente, se ainda vazio
+    const fcep = document.getElementById('frete-cep');
+    const ccep = document.getElementById('cep');
+    if (fcep && ccep && !fcep.value && ccep.value) fcep.value = ccep.value;
+  }
   else if (n === 5) {
     document.getElementById('tela-5').classList.add('ativa');
     renderizarRevisao();
@@ -1779,6 +1837,86 @@ function calcularFrete() {
   return el ? (parseFloat(el.value) || 0) : 0;
 }
 
+// ============================================================
+// COTAÇÃO DE FRETE (Frete Rápido via Worker)
+// ============================================================
+function cotarFrete() {
+  const cepEl = document.getElementById('frete-cep');
+  const cep = (cepEl.value || '').replace(/\D/g, '');
+  const statusEl = document.getElementById('frete-cot-status');
+  const ofertasEl = document.getElementById('frete-ofertas');
+  const btn = document.getElementById('btn-cotar-frete');
+
+  if (cep.length !== 8) { statusEl.textContent = '⚠ Informe um CEP de destino válido (8 dígitos).'; return; }
+  if (itens.length === 0) { statusEl.textContent = '⚠ Adicione produtos antes de cotar o frete.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Cotando...';
+  statusEl.textContent = 'Consultando transportadoras...';
+  ofertasEl.innerHTML = '';
+
+  // Monta os itens com SKU, quantidade e preço
+  const itensCotacao = itens
+    .filter(it => !it.ehProdutoBordado)
+    .map(it => ({ sku: it.produto.sku, quantidade: it.totalPecas, preco: precoItem(it) }))
+    .filter(it => it.sku && it.quantidade > 0);
+
+  fetch(`${WORKER_URL}/frete/cotar`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ cepDestino: cep, itens: itensCotacao })
+  })
+  .then(r => r.json())
+  .then(data => {
+    btn.disabled = false; btn.textContent = 'Cotar frete';
+    if (data.error) {
+      if (data.error === 'skus_sem_dimensao' && data.missingSkus) {
+        const nomes = data.missingSkus.map(m => m.sku || m.name).join(', ');
+        statusEl.textContent = `⚠ Produtos sem dimensão no sistema de frete: ${nomes}. Preencha o valor manualmente.`;
+      } else {
+        statusEl.textContent = '⚠ ' + (data.message || 'Não foi possível cotar. Preencha o valor manualmente.');
+      }
+      return;
+    }
+    const offers = data.offers || [];
+    if (offers.length === 0) {
+      statusEl.textContent = 'Nenhuma opção de frete encontrada para este CEP.';
+      return;
+    }
+    statusEl.textContent = `${offers.length} opção(ões) encontrada(s). Clique para selecionar:`;
+    ofertasEl.innerHTML = offers.map((o, i) => {
+      const carrier = (o.carrier && o.carrier.name) || o.carrier || '—';
+      const preco = o.final_price || 0;
+      const prazo = (o.delivery_time && o.delivery_time.days) ? `${o.delivery_time.days} dia(s)` : (o.service || '');
+      return `<div onclick='selecionarOfertaFrete(${JSON.stringify(carrier)}, ${preco})'
+        style="background:var(--branco);border:1px solid var(--cinza-borda);border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;"
+        onmouseover="this.style.borderColor='var(--vermelho)'" onmouseout="this.style.borderColor='var(--cinza-borda)'">
+        <div><div style="font-weight:700;font-size:13px;">${carrier}</div><div style="font-size:11px;color:var(--cinza-texto);">${prazo}</div></div>
+        <div style="font-weight:800;font-size:15px;color:var(--verde);">${formatarMoeda(preco)}</div>
+      </div>`;
+    }).join('');
+  })
+  .catch(() => {
+    btn.disabled = false; btn.textContent = 'Cotar frete';
+    statusEl.textContent = '⚠ Erro de conexão ao cotar. Preencha o valor manualmente.';
+  });
+}
+
+function selecionarOfertaFrete(carrier, preco) {
+  // Preenche transportadora (adiciona à lista se não existir) e valor
+  const selTransp = document.getElementById('transportadora');
+  let existe = false;
+  for (const op of selTransp.options) { if (op.value === carrier) { existe = true; break; } }
+  if (!existe) {
+    const op = document.createElement('option');
+    op.value = carrier; op.textContent = carrier;
+    selTransp.appendChild(op);
+  }
+  selTransp.value = carrier;
+  document.getElementById('valor-frete').value = Number(preco).toFixed(2);
+  document.getElementById('frete-cot-status').textContent = `✅ Selecionado: ${carrier} — ${formatarMoeda(preco)}`;
+  atualizarTotais();
+}
+
 // Tecla Tab/Enter navega entre células da grade
 function navegarGrade(event, itemId, szAtual) {
   if (event.key !== 'Tab' && event.key !== 'Enter') return;
@@ -1931,6 +2069,9 @@ function exportarOrcamento() {
   const pagadorFrete   = g('pagador-frete');
   const valorFrete     = calcularFrete();
   const dadosOrcamento = g('dados-orcamento') || 'Da empresa';
+  const natureza  = g('natureza');
+  const tipo      = g('tipo');
+  const emailNfe  = g('email-nfe');
 
   const endCompleto = [end, comp, bairro, cidade, estado].filter(Boolean).join(', ') + (cep ? ' CEP: ' + cep : '');
   const dataEmissao = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
@@ -2071,6 +2212,9 @@ function exportarOrcamento() {
       <tr><td class="k">Transportadora</td><td>${transportadora || '—'}</td></tr>
       <tr><td class="k">Pagador do frete</td><td>${pagadorFrete || '—'}</td></tr>
       <tr><td class="k">Valor do frete</td><td>${valorFrete > 0 ? formatarMoeda(valorFrete) : 'R$ 0,00'}</td></tr>
+      ${natureza ? `<tr><td class="k">Natureza</td><td>${natureza}</td></tr>` : ''}
+      ${tipo ? `<tr><td class="k">Tipo</td><td>${tipo}</td></tr>` : ''}
+      ${emailNfe ? `<tr><td class="k">E-mail NF-e</td><td>${emailNfe}</td></tr>` : ''}
       ${obs ? `<tr><td class="k">Observações</td><td>${obs}</td></tr>` : ''}
       ${infoImp ? `<tr><td class="k">Informação importante</td><td>${infoImp}</td></tr>` : ''}
       <tr><td class="k">Dados adicionais</td><td>${dadosAdic || '—'}</td></tr>
@@ -2291,6 +2435,9 @@ function executarEnvio() {
       transportadora: document.getElementById('transportadora').value,
       pagador_frete: document.getElementById('pagador-frete').value,
       valor_frete: calcularFrete(),
+      natureza: document.getElementById('natureza').value,
+      tipo: document.getElementById('tipo').value,
+      email_nfe: document.getElementById('email-nfe').value,
       valor_total: calcularTotal(),
     },
     itens: itens.map(it => ({
@@ -2476,6 +2623,9 @@ function montarPayload() {
       transportadora:       document.getElementById('transportadora').value,
       pagador_frete:        document.getElementById('pagador-frete').value,
       valor_frete:          calcularFrete(),
+      natureza:             document.getElementById('natureza').value,
+      tipo:                 document.getElementById('tipo').value,
+      email_nfe:            document.getElementById('email-nfe').value,
       valor_total:          calcularTotal(),
     },
     itens: itens.map(it => ({
@@ -2632,7 +2782,7 @@ function preencherFormulario(dados) {
       'obs-pedido':'obs','info-importante':'info_importante',
       'condicao-pagamento':'condicao_de_pagamento','dados-adicionais':'dados_adicionais',
       'transportadora':'transportadora','pagador-frete':'pagador_frete','valor-frete':'valor_frete',
-      'dados-orcamento':'dados_orcamento'};
+      'dados-orcamento':'dados_orcamento','natureza':'natureza','tipo':'tipo','email-nfe':'email_nfe'};
     Object.entries(mapP).forEach(([id, key]) => {
       const el = document.getElementById(id);
       if (el && pedido[key] !== undefined) el.value = pedido[key] || '';
