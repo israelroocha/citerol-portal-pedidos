@@ -690,6 +690,45 @@
             <input type="text" id="contato-tel2" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)">
           </div>
         </div>
+
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--cinza-bg);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <input type="checkbox" id="usar-end-contato" onchange="toggleEnderecoContato()" style="width:16px;height:16px;cursor:pointer;">
+            <label for="usar-end-contato" style="font-size:13px;font-weight:700;color:var(--cinza-texto);cursor:pointer;margin:0;">Preencher endereço do contato (opcional)</label>
+          </div>
+          <div id="bloco-end-contato" style="display:none;margin-top:10px;">
+            <div class="grid-2">
+              <div class="campo">
+                <label>CEP</label>
+                <input type="text" id="contato-cep" placeholder="00000-000" maxlength="9" oninput="mascaraCEP(this)" onblur="buscarCEPContato()">
+              </div>
+              <div class="campo">
+                <label>Endereço</label>
+                <input type="text" id="contato-endereco" placeholder="Rua, avenida...">
+              </div>
+              <div class="campo">
+                <label>Número</label>
+                <input type="text" id="contato-numero" placeholder="Nº">
+              </div>
+              <div class="campo">
+                <label>Complemento</label>
+                <input type="text" id="contato-complemento" placeholder="Sala, andar...">
+              </div>
+              <div class="campo">
+                <label>Bairro</label>
+                <input type="text" id="contato-bairro" placeholder="Bairro">
+              </div>
+              <div class="campo">
+                <label>Cidade</label>
+                <input type="text" id="contato-cidade" placeholder="Cidade">
+              </div>
+              <div class="campo">
+                <label>Estado</label>
+                <input type="text" id="contato-estado" placeholder="UF" maxlength="2">
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -924,9 +963,9 @@
           </div>
           <div class="campo">
             <label>Tipo</label>
-            <select id="tipo">
-              <option value="">Selecione o tipo</option>
-            </select>
+            <input type="text" id="tipo" value="MULTIFORM" readonly
+              style="background:var(--cinza-bg);color:var(--cinza-texto);cursor:not-allowed;">
+            <div class="hint">Fixo como MULTIFORM</div>
           </div>
           <div class="campo col-span-2">
             <label>E-mail da Nota Fiscal Eletrônica</label>
@@ -1168,14 +1207,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selNat.appendChild(op);
     });
   }
-  const selTipo = document.getElementById('tipo');
-  if (selTipo) {
-    TIPOS.forEach(t => {
-      const op = document.createElement('option');
-      op.value = t; op.textContent = t;
-      selTipo.appendChild(op);
-    });
-  }
+  // 'tipo' é fixo como MULTIFORM (input readonly)
 
   // Enter no login
   document.getElementById('login-senha').addEventListener('keydown', e => {
@@ -1316,10 +1348,10 @@ function iniciarNovoOrcamento() {
   bordados = [];
   arquivoBordadoTemp = null;
   rascunhoAtivo = null;
-  ['cnpj','razao-social','cep','endereco','complemento','bairro','cidade','contato-nome','cpf','contato-email','contato-tel','contato-tel2','obs-pedido','info-importante','dados-adicionais','valor-frete','email-nfe','frete-cep'].forEach(id => {
+  ['cnpj','razao-social','cep','endereco','complemento','bairro','cidade','contato-nome','cpf','contato-email','contato-tel','contato-tel2','obs-pedido','info-importante','dados-adicionais','valor-frete','email-nfe','frete-cep','contato-cep','contato-endereco','contato-numero','contato-complemento','contato-bairro','contato-cidade','contato-estado'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
-  ['estado','vendedora-loja','loja-select','condicao-pagamento','transportadora','pagador-frete','natureza','tipo'].forEach(id => {
+  ['estado','vendedora-loja','loja-select','condicao-pagamento','transportadora','pagador-frete','natureza'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   // Pré-seleciona a loja do login
@@ -1331,6 +1363,8 @@ function iniciarNovoOrcamento() {
       }
     }
   }
+  const tipoEl = document.getElementById('tipo'); if (tipoEl) tipoEl.value = 'MULTIFORM';
+  const usarEndEl = document.getElementById('usar-end-contato'); if (usarEndEl) { usarEndEl.checked = false; toggleEnderecoContato(); }
   renderizarItens();
   renderizarAnexos();
   renderizarBordados();
@@ -1552,6 +1586,27 @@ function buscarCEP() {
         document.getElementById('bairro').value = d.bairro || '';
         document.getElementById('cidade').value = d.localidade || '';
         document.getElementById('estado').value = d.uf || '';
+      }
+    })
+    .catch(() => {});
+}
+
+function toggleEnderecoContato() {
+  const check = document.getElementById('usar-end-contato');
+  document.getElementById('bloco-end-contato').style.display = check.checked ? 'block' : 'none';
+}
+
+function buscarCEPContato() {
+  const cep = document.getElementById('contato-cep').value.replace(/\D/g, '');
+  if (cep.length !== 8) return;
+  fetch(`https://viacep.com.br/ws/${cep}/json/`)
+    .then(r => r.json())
+    .then(d => {
+      if (!d.erro) {
+        document.getElementById('contato-endereco').value = d.logradouro || '';
+        document.getElementById('contato-bairro').value = d.bairro || '';
+        document.getElementById('contato-cidade').value = d.localidade || '';
+        document.getElementById('contato-estado').value = d.uf || '';
       }
     })
     .catch(() => {});
@@ -2073,6 +2128,19 @@ function exportarOrcamento() {
   const tipo      = g('tipo');
   const emailNfe  = g('email-nfe');
 
+  // Endereço de entrega (contato) — opcional
+  const usarEndContato = document.getElementById('usar-end-contato') && document.getElementById('usar-end-contato').checked;
+  const cEnd  = g('contato-endereco');
+  const cNum  = g('contato-numero');
+  const cComp = g('contato-complemento');
+  const cBairro = g('contato-bairro');
+  const cCidade = g('contato-cidade');
+  const cEstado = g('contato-estado');
+  const cCep  = g('contato-cep');
+  const endContatoCompleto = usarEndContato
+    ? [cEnd, cNum, cComp, cBairro, cCidade, cEstado].filter(Boolean).join(', ') + (cCep ? ' CEP: ' + cCep : '')
+    : '';
+
   const endCompleto = [end, comp, bairro, cidade, estado].filter(Boolean).join(', ') + (cep ? ' CEP: ' + cep : '');
   const dataEmissao = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
   const numOrc = Date.now().toString().slice(-10);
@@ -2183,6 +2251,7 @@ function exportarOrcamento() {
       <div class="fiscal-linha"><b>RAZÃO SOCIAL:</b> ${razao || '—'}</div>
       `}
       <div class="fiscal-linha"><b>ENDEREÇO COMPLETO:</b> ${endCompleto}</div>
+      ${endContatoCompleto ? `<div class="fiscal-linha"><b>ENDEREÇO DE ENTREGA (CONTATO):</b> ${endContatoCompleto}</div>` : ''}
       <div class="fiscal-linha" style="margin-top:4px;font-size:8.5px;color:#888;">Faturamento: <b>${dadosOrcamento}</b></div>
     </div>
 
@@ -2423,6 +2492,14 @@ function executarEnvio() {
       email: document.getElementById('contato-email').value,
       telefone: document.getElementById('contato-tel').value,
       telefone2: document.getElementById('contato-tel2').value,
+      usar_endereco: document.getElementById('usar-end-contato').checked,
+      cep: document.getElementById('contato-cep').value,
+      endereco: document.getElementById('contato-endereco').value,
+      numero: document.getElementById('contato-numero').value,
+      complemento: document.getElementById('contato-complemento').value,
+      bairro: document.getElementById('contato-bairro').value,
+      cidade: document.getElementById('contato-cidade').value,
+      estado: document.getElementById('contato-estado').value,
     },
     pedido: {
       vendedora_da_loja: document.getElementById('vendedora-loja').value,
@@ -2611,6 +2688,14 @@ function montarPayload() {
       email:     document.getElementById('contato-email').value,
       telefone:  document.getElementById('contato-tel').value,
       telefone2: document.getElementById('contato-tel2').value,
+      usar_endereco: document.getElementById('usar-end-contato').checked,
+      cep: document.getElementById('contato-cep').value,
+      endereco: document.getElementById('contato-endereco').value,
+      numero: document.getElementById('contato-numero').value,
+      complemento: document.getElementById('contato-complemento').value,
+      bairro: document.getElementById('contato-bairro').value,
+      cidade: document.getElementById('contato-cidade').value,
+      estado: document.getElementById('contato-estado').value,
     },
     pedido: {
       vendedora_da_loja:    document.getElementById('vendedora-loja').value,
@@ -2769,11 +2854,20 @@ function preencherFormulario(dados) {
   // Contato
   if (contato) {
     const mapC = {'contato-nome':'nome','cpf':'cpf','contato-email':'email',
-      'contato-tel':'telefone','contato-tel2':'telefone2'};
+      'contato-tel':'telefone','contato-tel2':'telefone2',
+      'contato-cep':'cep','contato-endereco':'endereco','contato-numero':'numero',
+      'contato-complemento':'complemento','contato-bairro':'bairro',
+      'contato-cidade':'cidade','contato-estado':'estado'};
     Object.entries(mapC).forEach(([id, key]) => {
       const el = document.getElementById(id);
       if (el && contato[key] !== undefined) el.value = contato[key] || '';
     });
+    // Restaura o checkbox de endereço do contato
+    const usarEnd = document.getElementById('usar-end-contato');
+    if (usarEnd) {
+      usarEnd.checked = !!contato.usar_endereco;
+      toggleEnderecoContato();
+    }
   }
 
   // Pedido
@@ -2782,7 +2876,7 @@ function preencherFormulario(dados) {
       'obs-pedido':'obs','info-importante':'info_importante',
       'condicao-pagamento':'condicao_de_pagamento','dados-adicionais':'dados_adicionais',
       'transportadora':'transportadora','pagador-frete':'pagador_frete','valor-frete':'valor_frete',
-      'dados-orcamento':'dados_orcamento','natureza':'natureza','tipo':'tipo','email-nfe':'email_nfe'};
+      'dados-orcamento':'dados_orcamento','natureza':'natureza','email-nfe':'email_nfe'};
     Object.entries(mapP).forEach(([id, key]) => {
       const el = document.getElementById(id);
       if (el && pedido[key] !== undefined) el.value = pedido[key] || '';
